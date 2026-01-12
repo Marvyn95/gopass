@@ -1,22 +1,27 @@
 {% extends "base.html" %}
 
 {% block content %}
-<div class="container my-4">
+<div class="container my-5">
     <div class="row justify-content-center">
-        <div class="col-md-6">
-            <div class="card shadow">
-                <div class="card-body">
-                    <h2 class="card-title text-center mb-4">Login</h2>
+        <div class="col-md-4">
+            <div class="card h-100 shadow-sm border-0" style="background: #000; border-radius: 1rem; border: 2px solid; border-image: linear-gradient(135deg, #8ec5ff 0%, #3b82f6 60%, #ba1a6a 100%) 1;">
+                <div class="card-body" style="background: transparent; border-radius: 1rem;">
+                    </div>
+                    <h2 class="card-title text-center fw-bold mb-4" style="font-size: 1.7rem; background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">
+                        Login
+                    </h2>
                     <form method="POST" action="{{ url_for('login') }}">
                         <div class="mb-3">
-                            <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" name="email" required>
+                            <label for="email" class="form-label text-light fw-semibold">Email</label>
+                            <input type="email" class="form-control bg-dark text-light border-0" id="email" name="email" required>
                         </div>
                         <div class="mb-3">
-                            <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" name="password" required>
+                            <label for="password" class="form-label text-light fw-semibold">Password</label>
+                            <input type="password" class="form-control bg-dark text-light border-0" id="password" name="password" required>
                         </div>
-                        <button type="submit" class="btn btn-primary w-100">Login</button>
+                        <button type="submit" class="btn w-100" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); color: #fff; border: none;">
+                            Submit
+                        </button>
                     </form>
                 </div>
             </div>
