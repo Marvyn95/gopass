@@ -1,0 +1,104 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="container">
+    <h2 class="col-md-8 mx-auto" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">Create Event</h2>
+    <form method="post" enctype="multipart/form-data" class="row g-3 col-md-8 mx-auto">
+        <input type="hidden" name="user_id" value="{{ user._id }}">
+        <div class="col-md-12">
+            <label for="title" class="form-label text-light">Title</label>
+            <input type="text" class="form-control border-dark" id="title" name="title" required>
+        </div>
+        <div class="col-md-12">
+            <label for="description" class="form-label text-light">Description</label>
+            <textarea class="form-control border-dark" id="description" name="description" rows="4" placeholder="Describe the event" required></textarea>
+        </div>
+        <div class="col-md-8">
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="location-input" class="form-label text-light">Location</label>
+                    <select id="location-input" class="form-select border-dark" name="location" required>
+                        <option value="" disabled selected>Select location</option>
+                        <option>Kampala</option><option>Jinja</option><option>Mbarara</option>
+                        <option>Mbale</option><option>Fort Portal</option><option>Entebbe</option>
+                        <option>Wakiso</option><option>Hoima</option><option>Gulu</option><option>Arua</option>
+                    </select>
+                </div>
+                <div class="col-md-6">
+                    <label for="venue" class="form-label text-light">Venue</label>
+                    <input type="text" class="form-control border-dark" id="venue" name="venue" placeholder="Venue" required>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <label for="event_image" class="form-label text-light">Event Image</label>
+            <input type="file" class="form-control border-dark" id="event_image" name="event_image" accept="image/*" required>
+        </div>
+        <div class="col-md-4">
+            <label for="date" class="form-label text-light">Date</label>
+            <input type="date" class="form-control border-dark" id="date" name="date" required>
+        </div>
+        <div class="col-md-4">
+            <div class="row">
+                <div class="col-md-6">
+                    <label for="start_time" class="form-label text-light">Start</label>
+                    <input type="time" class="form-control border-dark" id="start_time" name="start_time" required>
+                </div>
+                <div class="col-md-6">
+                    <label for="end_time" class="form-label text-light">End</label>
+                    <input type="time" class="form-control border-dark" id="end_time" name="end_time" required>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <label for="category" class="form-label text-light">Event Category</label>
+            <select id="category" class="form-select border-dark" name="category" required>
+                <option value="" disabled selected>Select category</option>
+                <option>Music</option>
+                <option>Sports</option>
+                <option>Conference</option>
+                <option>Workshop</option>
+                <option>Seminar</option>
+                <option>Festival</option>
+                <option>Meetup</option>
+                <option>Other</option>
+            </select>
+        </div>
+        <div class="col-md-6">
+            <label class="form-label text-light">Ticket Categories</label>
+            <div id="ticket-types-list">
+                <div class="input-group mb-2 ticket-type-item">
+                    <input type="text" class="form-control border-dark me-1" name="ticket_types[]" placeholder="Category" required>
+                    <input type="number" class="form-control border-dark" name="ticket_prices[]" placeholder="Price" min="0" step="0.01" required>
+                    <button type="button" class="btn btn-outline-danger remove-ticket-type" title="Remove">&times;</button>
+                </div>
+            </div>
+            <button type="button" class="btn btn-outline-primary btn-sm mt-1" id="add-ticket-type">Add Category</button>
+        </div>
+        <div class="col-12 d-flex justify-content-center">
+            <button type="submit" class="btn btn-success" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); border: none;">Create Event</button>
+        </div>
+    </form>
+    <script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const ticketTypesList = document.getElementById('ticket-types-list');
+        const addBtn = document.getElementById('add-ticket-type');
+        addBtn.addEventListener('click', function() {
+            const div = document.createElement('div');
+            div.className = 'input-group mb-2 ticket-type-item';
+            div.innerHTML = `
+                <input type="text" class="form-control border-dark" name="ticket_types[]" placeholder="Category" required>
+                <input type="number" class="form-control border-dark" name="ticket_prices[]" placeholder="Price" min="0" step="0.01" required>
+                <button type="button" class="btn btn-outline-danger remove-ticket-type" title="Remove">&times;</button>
+            `;
+            ticketTypesList.appendChild(div);
+        });
+        ticketTypesList.addEventListener('click', function(e) {
+            if (e.target.classList.contains('remove-ticket-type')) {
+                const item = e.target.closest('.ticket-type-item');
+                if (ticketTypesList.children.length > 1) item.remove();
+            }
+        });
+    });
+    </script>
+</div>
+{% endblock %}
