@@ -2,7 +2,7 @@ from __init__ import app, db, bcrypt
 from flask import request, jsonify, render_template, redirect, url_for, session, flash
 from bson.objectid import ObjectId
 from datetime import datetime
-from utils import save_image
+from utils import save_image, delete_image
 
 
 @app.route('/')
@@ -146,11 +146,14 @@ def create_event():
             'start_time': sdt,
             'end_time': edt,
             'category': category,
-            'ticket_categories': ticket_categories
+            'ticket_categories': ticket_categories,
+            'organization_id': ObjectId(user.get('organization_id')) if user and 'organization_id' in user else None
         })
 
         flash('Event created and published successfully!', 'success')
 
+        return redirect(url_for('profile'))
+    
     return render_template('create_event.html', user=user)
 
 @app.route('/login', methods=['GET', 'POST'])
@@ -326,12 +329,102 @@ def add_organization():
 @app.route('/delete_event', methods=['POST'])
 def delete_event():
     if request.method == 'POST':
-        pass
+        event_id = request.form['event_id']
+        event = db.events.find_one({'_id': ObjectId(event_id)})
+        if event and 'image' in event:
+            delete_image(event.get('image'))
+        
+        db.events.delete_one({'_id': ObjectId(event_id)})
+        flash('Event deleted successfully!', 'success')
+        
     return redirect(url_for('profile'))
 
 
 @app.route('/edit_event', methods=['POST'])
 def edit_event():
     if request.method == 'POST':
+        title = request.form['title'].strip()
+        description = request.form['description'].strip()
+        location = request.form['location'].strip()
+        venue = request.form['venue'].strip()
+        date = request.form['date']
+        start_time = request.form['start_time']
+        end_time = request.form['end_time']
+        category = request.form['category']
+        event_id = request.form['event_id']
+        ticket_types = request.form.getlist('ticket_types[]')
+        ticket_prices = request.form.getlist('ticket_prices[]')
+
+        ticket_categories = {}
+        for t_type, t_price in zip(ticket_types, ticket_prices):
+            if t_type.strip() != '' and t_price.strip() != '':
+                ticket_categories[t_type] = t_price
+        
+        st = datetime.strptime(start_time, '%H:%M')
+        et = datetime.strptime(end_time, '%H:%M')
+
+        sdt = datetime.strptime(date, '%Y-%m-%d').replace(hour=st.hour, minute=st.minute)
+        edt = datetime.strptime(date, '%Y-%m-%d').replace(hour=et.hour, minute=et.minute)
+
+        user = db.users.find_one({'_id': ObjectId(session['user_id'])}) if 'user_id' in session else None
+
+        if user is None:
+            flash('User not found. Please log in again.', 'danger')
+            return redirect(url_for('login'))
+        
+        event_details = {
+            'title': title,
+            'description': description,
+            'location': location,
+            'venue': venue,
+            'date': datetime.strptime(date, '%Y-%m-%d'),
+            'start_time': sdt,
+            'end_time': edt,
+            'category': category,
+            'ticket_categories': ticket_categories,
+            'organization_id': ObjectId(user.get('organization_id')) if user and 'organization_id' in user else None
+        }
+
+        if 'event_image' in request.files and request.files['event_image'].filename != '':
+            image = save_image(request.files['event_image'])
+            event_details['image'] = image
+
+            event = db.events.find_one({'_id': ObjectId(event_id)})
+            if event and 'image' in event:
+                delete_image(event.get('image'))
+
+                
+        db.events.update_one(
+            {'_id': ObjectId(event_id)},
+            {'$set': event_details}
+        )
+        
+        flash('Event updated successfully!', 'success')
+        
+    return redirect(request.referrer)
+
+
+@app.route('/event_details/<event_id>', methods=['GET', 'POST'])
+def event_details(event_id):
+    user = db.users.find_one({'_id': ObjectId(session['user_id'])}) if 'user_id' in session else None
+    event = db.events.find_one({'_id': ObjectId(event_id)})
+
+    free_entry= True
+    for price in event.get('ticket_categories', {}).values():
+        if price != '0':
+            free_entry = False
+            break
+    return render_template('event_details.html', event=event, user=user, free_entry=free_entry)
+
+
+@app.route('/buy_tickets', methods=['POST'])
+def buy_tickets():
+    if request.method == 'POST':
         pass
-    return redirect(url_for('profile'))
+    return redirect(request.referrer)
+
+@app.route('/manage_events')
+def manage_events():
+    user = db.users.find_one({'_id': ObjectId(session['user_id'])}) if 'user_id' in session else None
+    events = list(db.events.find({'organization_id': ObjectId(user.get('organization_id'))})) if user and 'organization_id' in user else []
+    return render_template('manage_events.html', events=events, user=user)

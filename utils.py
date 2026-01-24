@@ -9,3 +9,8 @@ def save_image(file):
     image_path = os.path.join(app.root_path, 'static/event_images', image_name)
     file.save(image_path)
     return image_name
+
+def delete_image(image_name):
+    image_path = os.path.join(app.root_path, 'static/event_images', image_name)
+    if os.path.exists(image_path):
+        os.remove(image_path)

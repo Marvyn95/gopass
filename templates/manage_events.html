@@ -1,0 +1,75 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-12 mb-3">
+        <h3 class="card-title fw-bold mb-0" style=" background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">
+            Running Events
+        </h3>
+    </div>
+    {% if events %}
+        {% for event in events %}
+          <div class="col-12 col-md-6 col-lg-3 mb-4"> <!-- Changed col-lg-4 to col-lg-3 -->
+                <div class="card h-100 shadow position-relative" style="height: 100%;"> <!-- Added height style -->
+                    <img src="{{ url_for('static', filename='event_images/' ~ event.image) }}"
+                         class="card-img-top"
+                         alt="{{ event.title }}"
+                         style="height: 160px; object-fit: cover;"> <!-- Reduced height -->
+                    <div class="card-body d-flex flex-column">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h6 class="card-title mb-0"
+                                style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;"> <!-- Reduced max-width -->
+                                {{ event.title }}
+                            </h6>
+                        </div>
+                        <div class="mb-2">
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="bi bi-geo-alt-fill me-1" style="font-size: 1rem;"></i> <!-- Reduced font size -->
+                                <span class="fw-semibold" style="font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px;">{{ event.venue }}</span> <!-- Reduced font size and max-width -->
+                                <span class="mx-2 text-muted" style="font-size: 0.85rem;">&#8226;</span> <!-- Reduced font size -->
+                                <span class="text-muted small" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px;">{{ event.location }}</span> <!-- Reduced max-width -->
+                            </div>
+                            <div class="d-flex align-items-center mb-1">
+                                <i class="bi bi-calendar-event me-1" style="font-size: 0.9rem;"></i> <!-- Reduced font size -->
+                                <span class="text-muted small">{{ event.date.strftime("%d %b %Y") }}</span>
+                                <span class="mx-2 text-muted">&#8226;</span>
+                                <i class="bi bi-clock me-1" style="font-size: 0.9rem;"></i> <!-- Reduced font size -->
+                                <span class="text-muted small">{{ event.start_time.strftime("%H:%M") }} - {{ event.end_time.strftime("%H:%M") }} hrs</span>
+                            </div>
+                            <div class="mt-2 mb-0">
+                                <div class="d-flex align-items-start gap-2">
+                                    <i class="bi bi-info-circle" style="color: #3b82f6; font-size: 1rem;"></i> <!-- Reduced font size -->
+                                    <p class="small mb-0" style="
+                                        overflow: hidden;
+                                        text-overflow: ellipsis;
+                                        display: -webkit-box;
+                                        -webkit-line-clamp: 2;
+                                        line-clamp: 2;
+                                        -webkit-box-orient: vertical;
+                                        max-width: 220px; <!-- Reduced max-width -->
+                                        color: #444;
+                                        background: rgba(140,197,255,0.08);
+                                        border-radius: 0.5rem;">
+                                        {{ event.description }}
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mt-2">
+                          <a href="{{ url_for('event_details', event_id=event._id) }}" class="btn btn-sm w-100" style="background: linear-gradient(90deg,#8ec5ff,#3b82f6,#ec4899); border: none; color: #fff; box-shadow: 0 4px 14px rgba(60,60,60,0.12); display: inline-block; text-decoration: none;">
+                          View Event Details
+                          </a>
+                        </div>
+                    </div>
+                </div>
+        </div>
+        {% endfor %}
+    {% else %}
+        <div class="col-12">
+            <div class="alert alert-info">No running events found.</div>
+        </div>
+    {% endif %}
+
+</div>
+{% endblock %}
