@@ -1,0 +1,145 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="event-card col-md-8" role="region" aria-label="Event details">
+
+      <div class="event-header">
+        <div class="d-flex flex-wrap flex-column">
+          <h3 class="title"
+              style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899);
+             -webkit-background-clip: text;
+             background-clip: text;
+             color: transparent;
+             -webkit-text-fill-color: transparent;">
+            Order Summary
+          </h3>
+
+          <div class="meta text-light d-flex flex-column mt-3">
+            <p class="chip mb-3">
+              <strong>{{ ticket_category }}</strong> ticket: UGX {{ "{:,}".format((total_price / quantity)|int) }} /= each
+            </p>
+            <p class="chip mb-3">
+              Quantity: <strong>{{ quantity }}</strong>
+            </p>
+            <p class="chip mb-3">
+              Total: <strong>UGX {{ "{:,}".format(total_price|int) }} /=</strong>
+            </p>
+            <p class="chip" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; font-weight: bold;">
+              {{ event.title }}
+            </p>
+            <p class="chip"><span style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; font-weight: bold;">Category: {{ event.category }}</span></p>
+          </div>
+
+          <div class="meta text-light d-flex flex-column mt-2">
+            <p class="chip">📅 {{ event.date.strftime('%d %b %Y') }}</p>
+            <p class="chip">
+              ⏰ {{ event.start_time.strftime('%I:%M %p') }}
+              {% if event.end_time %} — {{ event.end_time.strftime('%I:%M %p') }}{% endif %}
+            </p>
+            <p class="chip">📍 {{ event.location }}</p>
+            <p class="chip">
+              <i class="bi bi-geo-alt"> Venue: {{ event.venue }}</i>
+            </p>
+          </div>
+
+        </div>
+        <div class="mt-4 d-flex gap-3 flex-wrap">
+            <button class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#airtelModal">
+                <i class="bi bi-wallet2"></i> Buy with Airtel Money
+            </button>
+            <button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#mtnModal">
+                <i class="bi bi-wallet2"></i> Buy with MTN MoMo Pay
+            </button>
+        </div>
+
+        <!-- Airtel Money Modal -->
+        <div class="modal fade" id="airtelModal" tabindex="-1">
+            <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title">Airtel Money Payment</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+            <p>Complete your payment of <strong>UGX {{ "{:,}".format(total_price|int) }} /=</strong> using Airtel Money</p>
+            <form method="POST" action="{{ url_for('airtel_payment_process') }}" id="airtelForm">
+                <input type="hidden" name="event_id" value="{{ event._id }}">
+                <input type="hidden" name="quantity" value="{{ quantity }}">
+                <input type="hidden" name="ticket_category" value="{{ ticket_category }}">
+                <input type="hidden" name="ticket_price" value="{{ ticket_price }}">
+                <input type="hidden" name="total_price" value="{{ total_price }}">
+                <input type="hidden" name="event_title" value="{{ event.title }}">
+                <input type="hidden" name="event_category" value="{{ event.category }}">
+                <input type="hidden" name="event_date" value="{{ event.date.strftime('%d %b %Y') }}">
+                <input type="hidden" name="event_start_time" value="{{ event.start_time.strftime('%I:%M %p') }}">
+                <input type="hidden" name="event_end_time" value="{{ event.end_time.strftime('%I:%M %p') if event.end_time else '' }}">
+                <input type="hidden" name="event_location" value="{{ event.location }}">
+                <input type="hidden" name="event_venue" value="{{ event.venue }}">
+                <input type="hidden" name="payment_method" value="airtel">
+                <div class="mb-3">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" name="phone_number" pattern="[0-9\s\-\+\(\)]{10,}" inputmode="numeric" placeholder="07..." required>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-danger">Pay Now</button>
+                </div>
+            </form>
+            </div>
+            </div>
+            </div>
+        </div>
+
+        <!-- MTN MoMo Pay Modal -->
+        <div class="modal fade" id="mtnModal" tabindex="-1">
+            <div class="modal-dialog">
+            <div class="modal-content">
+            <div class="modal-header">
+            <h5 class="modal-title">MTN MoMo Pay Payment</h5>
+            <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+            <p>Complete your payment of <strong>UGX {{ "{:,}".format(total_price|int) }} /=</strong> using MTN MoMo Pay</p>
+            <form method="POST" action="{{ url_for('mtn_payment_process') }}" id="mtnForm">
+                <input type="hidden" name="quantity" value="{{ quantity }}">
+                <input type="hidden" name="ticket_category" value="{{ ticket_category }}">
+                <input type="hidden" name="ticket_price" value="{{ ticket_price }}">
+                <input type="hidden" name="total_price" value="{{ total_price }}">
+                <input type="hidden" name="event_title" value="{{ event.title }}">
+                <input type="hidden" name="event_category" value="{{ event.category }}">
+                <input type="hidden" name="event_date" value="{{ event.date.strftime('%d %b %Y') }}">
+                <input type="hidden" name="event_start_time" value="{{ event.start_time.strftime('%I:%M %p') }}">
+                <input type="hidden" name="event_end_time" value="{{ event.end_time.strftime('%I:%M %p') if event.end_time else '' }}">
+                <input type="hidden" name="event_location" value="{{ event.location }}">
+                <input type="hidden" name="event_venue" value="{{ event.venue }}">
+                <input type="hidden" name="payment_method" value="airtel">
+                <div class="mb-3">
+                <label class="form-label">Phone Number</label>
+                <input type="tel" class="form-control" name="phone_number" required>
+                </div>
+                <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-danger">Pay Now</button>
+                </div>
+            </form>
+            </div>
+            </div>
+            </div>
+        </div>
+
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+        </div>
+
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

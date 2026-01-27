@@ -1,8 +1,13 @@
 from __init__ import app, db, bcrypt
-from flask import request, jsonify, render_template, redirect, url_for, session, flash
+from flask import request, jsonify, render_template, redirect, url_for, session, flash, send_file
 from bson.objectid import ObjectId
 from datetime import datetime
 from utils import save_image, delete_image
+import qrcode
+import json
+from io import BytesIO
+import base64
+from PIL import Image, ImageDraw, ImageFont
 
 
 @app.route('/')
@@ -417,14 +422,143 @@ def event_details(event_id):
     return render_template('event_details.html', event=event, user=user, free_entry=free_entry)
 
 
-@app.route('/buy_tickets', methods=['POST'])
+@app.route('/buy_tickets', methods=['GET','POST'])
 def buy_tickets():
     if request.method == 'POST':
-        pass
-    return redirect(request.referrer)
+        event_id = request.form['event_id']
+        ticket_category = request.form['ticket_category']
+        quantity = int(request.form['quantity'])
+
+        event = db.events.find_one({'_id': ObjectId(event_id)})
+        ticket_price = event.get('ticket_categories', {}).get(ticket_category, '0')
+        total_price = quantity * float(ticket_price)
+
+        return render_template('payment_page.html', event=event, ticket_price=ticket_price, ticket_category=ticket_category, quantity=quantity, total_price=total_price)
+
 
 @app.route('/manage_events')
 def manage_events():
     user = db.users.find_one({'_id': ObjectId(session['user_id'])}) if 'user_id' in session else None
     events = list(db.events.find({'organization_id': ObjectId(user.get('organization_id'))})) if user and 'organization_id' in user else []
     return render_template('manage_events.html', events=events, user=user)
+
+
+@app.route('/airtel_payment_process', methods=['POST'])
+def airtel_payment_process():
+    if request.method == 'POST':
+        event_id = request.form['event_id']
+        quantity = request.form['quantity']
+        ticket_category = request.form['ticket_category']
+        ticket_price = request.form['ticket_price']
+        total_price = request.form['total_price']
+        event_title = request.form['event_title']
+        event_category = request.form['event_category']
+        event_date = request.form['event_date']
+        event_start_time = request.form['event_start_time']
+        event_end_time = request.form['event_end_time']
+        event_location = request.form['event_location']
+        event_venue = request.form['event_venue']
+        payment_method = request.form['payment_method']
+        phone_number = request.form['phone_number'].strip()
+
+        event = db.events.find_one({'_id': ObjectId(event_id)})
+
+
+        # logic for api integration goes here
+        # -----------------------------------------------------------------------
+
+
+        booking_id = db.bookings.insert_one({
+            'event_id': ObjectId(event_id),
+            'organization_id': ObjectId(event.get('organization_id')),
+            'ticket_category': ticket_category,
+            'ticket_price': ticket_price,
+            'quantity': int(quantity),
+            'total_price': float(total_price),
+            'payment_method': payment_method,
+            'phone_number': phone_number,
+            'status': 'paid',
+            'booking_date': datetime.now()
+        }).inserted_id
+
+
+        qrcode_details = {
+            'event_id': event_id,
+            'event_title': event_title,
+            'event_category': event_category,
+            'event_date': event_date,
+            'start_time': event_start_time,
+            'end_time': event_end_time,
+            'event_location': event_location,
+            'event_venue': event_venue,
+            'ticket_category': ticket_category,
+            'ticket_price': ticket_price,
+            'quantity': int(quantity),
+            'total_price': float(total_price),
+            'phone_number': phone_number,
+            'booking_id': str(booking_id)
+        }
+
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr.add_data(json.dumps(qrcode_details))
+        qr.make(fit=True)
+
+        img = qr.make_image(fill_color="black", back_color="white")
+        img_io = BytesIO()
+        img.save(img_io, 'PNG')
+        img_io.seek(0)
+        qr_code = base64.b64encode(img_io.getvalue()).decode()
+
+        db.bookings.update_one(
+            {'_id': booking_id},
+            {'$set': {'qr_code': qr_code}}
+        )
+
+        # Creating ticket
+        ticket_width, ticket_height = 800, 400
+        ticket = Image.new('RGB', (ticket_width, ticket_height), color='white')
+        draw = ImageDraw.Draw(ticket)
+
+        # Add border
+        draw.rectangle([10, 10, ticket_width-10, ticket_height-10], outline='black', width=2)
+
+        # Add event details text
+        y_offset = 30
+        draw.text((30, y_offset), f"Event: {event_title}", fill='black')
+        draw.text((30, y_offset+40), f"Category: {event_category}", fill='black')
+        draw.text((30, y_offset+80), f"Date: {event_date}", fill='black')
+        draw.text((30, y_offset+120), f"Time: {event_start_time} - {event_end_time}", fill='black')
+        draw.text((30, y_offset+160), f"Location: {event_location}", fill='black')
+        draw.text((30, y_offset+200), f"Venue: {event_venue}", fill='black')
+        draw.text((30, y_offset+240), f"Category: {ticket_category}", fill='black')
+        draw.text((30, y_offset+280), f"Quantity: {quantity}", fill='black')
+
+        # Add QR code to ticket
+        qr_img = Image.open(BytesIO(base64.b64decode(qr_code)))
+        qr_img = qr_img.resize((150, 150))
+        ticket.paste(qr_img, (600, 120))
+
+        # Save ticket
+        ticket_io = BytesIO()
+        ticket.save(ticket_io, 'PNG')
+        ticket_io.seek(0)
+
+        db.bookings.update_one(
+            {'_id': booking_id},
+            {'$set': {'ticket': base64.b64encode(ticket_io.getvalue()).decode()}}
+        )
+
+        flash('Payment done and dusted', 'success')
+        return send_file(ticket_io, mimetype='image/png', as_attachment=True, download_name=f'{event_title}_{booking_id}_ticket.png')
+    
+
+@app.route('/mtn_payment_process', methods=['POST'])
+def mtn_payment_process():
+    if request.method == 'POST':
+        event_id = request.form['event_id']
+
+        print(event_id)
+        
+
+        flash('Payment done and dusted', 'success')
+        return redirect(url_for('event_details', event_id=event_id))
