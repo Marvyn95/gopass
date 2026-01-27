@@ -547,6 +547,7 @@ def airtel_payment_process():
             {'_id': booking_id},
             {'$set': {'ticket': base64.b64encode(ticket_io.getvalue()).decode()}}
         )
+        
 
         flash('Payment done and dusted', 'success')
         return send_file(ticket_io, mimetype='image/png', as_attachment=True, download_name=f'{event_title}_{booking_id}_ticket.png')
