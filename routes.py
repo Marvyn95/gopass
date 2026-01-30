@@ -464,9 +464,8 @@ def airtel_payment_process():
         event = db.events.find_one({'_id': ObjectId(event_id)})
 
 
-        # logic for api integration goes here
+        # logic for mobile money api integration goes here
         # -----------------------------------------------------------------------
-
 
         booking_id = db.bookings.insert_one({
             'event_id': ObjectId(event_id),
@@ -493,8 +492,6 @@ def airtel_payment_process():
             'event_venue': event_venue,
             'ticket_category': ticket_category,
             'ticket_price': ticket_price,
-            'quantity': int(quantity),
-            'total_price': float(total_price),
             'phone_number': phone_number,
             'booking_id': str(booking_id)
         }
@@ -515,28 +512,52 @@ def airtel_payment_process():
         )
 
         # Creating ticket
-        ticket_width, ticket_height = 800, 400
-        ticket = Image.new('RGB', (ticket_width, ticket_height), color='white')
+        ticket_width, ticket_height = 600, 200
+        ticket = Image.new('RGB', (ticket_width, ticket_height), color='#f0f0f0')
         draw = ImageDraw.Draw(ticket)
 
-        # Add border
-        draw.rectangle([10, 10, ticket_width-10, ticket_height-10], outline='black', width=2)
+        # Load event image
+        event_image = Image.open(f"static/event_images/{event.get('image')}")
+        event_image = event_image.resize((ticket_width, ticket_height))
+        event_image.putalpha(int(255 * 0.2))  # Set opacity to 30%
+        ticket.paste(event_image, (0, 0), event_image)
 
-        # Add event details text
-        y_offset = 30
-        draw.text((30, y_offset), f"Event: {event_title}", fill='black')
-        draw.text((30, y_offset+40), f"Category: {event_category}", fill='black')
-        draw.text((30, y_offset+80), f"Date: {event_date}", fill='black')
-        draw.text((30, y_offset+120), f"Time: {event_start_time} - {event_end_time}", fill='black')
-        draw.text((30, y_offset+160), f"Location: {event_location}", fill='black')
-        draw.text((30, y_offset+200), f"Venue: {event_venue}", fill='black')
-        draw.text((30, y_offset+240), f"Category: {ticket_category}", fill='black')
-        draw.text((30, y_offset+280), f"Quantity: {quantity}", fill='black')
+        # Add gradient-like border
+        # draw.rectangle([10, 10, ticket_width-10, ticket_height-10], outline="#000000", width=3)
 
-        # Add QR code to ticket
+        # Add event title in header
+        try:
+            title_font = ImageFont.truetype("arial.ttf", 20)
+            detail_font = ImageFont.truetype("DejaVuSans.ttf", 16)  # Changed to a sans-serif font
+        except:
+            title_font = ImageFont.load_default()
+            detail_font = ImageFont.load_default()
+
+        draw.text((30, 25), f"{event_title}", fill="#cb2247", font=title_font, weight="bold")
+
+        # Add event details text on the left side
+        y_offset = 60
+        line_height = 25
+        details = [
+            f"{event_date}  |  {event_start_time} - {event_end_time}",
+            f"{event_location}  |  {event_venue}",
+            f"Ticket : {ticket_category}  |  Qty : {quantity}",
+            f"Price : {ticket_price} UGX",
+            f"Booking ID : {str(booking_id)}"
+        ]
+        
+        for detail in details:
+            draw.text((30, y_offset), detail, fill='#2c3e50', font=detail_font)
+            y_offset += line_height
+
+        # Add vertical line in the middle
+        mid_x = ticket_width // 2
+        draw.line([(mid_x, 15), (mid_x, ticket_height - 15)], fill="#000000", width=2)
+
+        # Add QR code to the right side
         qr_img = Image.open(BytesIO(base64.b64decode(qr_code)))
         qr_img = qr_img.resize((150, 150))
-        ticket.paste(qr_img, (600, 120))
+        ticket.paste(qr_img, (390, 25))
 
         # Save ticket
         ticket_io = BytesIO()
