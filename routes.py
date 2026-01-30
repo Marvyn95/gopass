@@ -466,6 +466,9 @@ def airtel_payment_process():
 
         # logic for mobile money api integration goes here
         # -----------------------------------------------------------------------
+        # -----------------------------------------------------------------------
+        # -----------------------------------------------------------------------
+
 
         booking_id = db.bookings.insert_one({
             'event_id': ObjectId(event_id),
