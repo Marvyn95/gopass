@@ -16,49 +16,49 @@
   <!-- Main Profile Info Cards -->
   <div class="row mb-3">
     <div class="col-md-6 col-lg-3 mb-4">
-      <div class="card bg-dark border-0 h-100">
+      <div class="card bg-light border-0 h-100 shadow">
         <div class="card-body">
           <div class="mb-3">
             <i class="bi bi-person-fill text-primary fs-5"></i>
           </div>
-          <p class="text-light small mb-2">Full Name</p>
-          <p class="text-light fw-bold">{{ user.first_name }} {{ user.last_name }}</p>
+          <p class="text-dark small mb-2">Full Name</p>
+          <p class="text-dark fw-bold">{{ user.first_name }} {{ user.last_name }}</p>
         </div>
       </div>
     </div>
 
-    <div class="col-md-6 col-lg-3 mb-3">
-      <div class="card bg-dark border-0 h-100">
+    <div class="col-md-6 col-lg-3 mb-4">
+      <div class="card bg-light border-0 h-100 shadow">
         <div class="card-body">
           <div class="mb-3">
             <i class="bi bi-envelope-fill text-primary fs-5"></i>
           </div>
-          <p class="text-light small mb-2">Email Address</p>
-          <p class="text-light fw-bold text-break">{{ user.email }}</p>
+          <p class="text-dark small mb-2">Email Address</p>
+          <p class="text-dark fw-bold text-break">{{ user.email }}</p>
         </div>
       </div>
     </div>
 
     <div class="col-md-6 col-lg-3 mb-4">
-      <div class="card bg-dark border-0 h-100">
+      <div class="card bg-light border-0 h-100 shadow">
         <div class="card-body">
           <div class="mb-3">
             <i class="bi bi-telephone-fill text-primary fs-5"></i>
           </div>
-          <p class="text-light small mb-2">Contact Number</p>
-          <p class="text-light fw-bold">{{ user.contact }}</p>
+          <p class="text-dark small mb-2">Contact Number</p>
+          <p class="text-dark fw-bold">{{ user.contact }}</p>
         </div>
       </div>
     </div>
 
     <div class="col-md-6 col-lg-3 mb-4">
-      <div class="card bg-dark border-0 h-100">
+      <div class="card bg-light border-0 h-100 shadow">
         <div class="card-body">
           <div class="mb-3">
             <i class="bi bi-geo-alt-fill text-primary fs-5"></i>
           </div>
-          <p class="text-light small mb-2">Role</p>
-          <p class="text-light fw-bold">{{ user.role }}</p>
+          <p class="text-dark small mb-2">Role</p>
+          <p class="text-dark fw-bold">{{ user.role }}</p>
         </div>
       </div>
     </div>
@@ -67,19 +67,19 @@
   <!-- Organization Info -->
   <div class="row mb-5">
     <div class="col-lg-8">
-      <div class="card bg-dark border-0">
+      <div class="card bg-light border-0 shadow">
         <div class="card-body">
           <div class="d-flex align-items-center mb-4">
             <i class="bi bi-building text-primary fs-4 me-2"></i>
-            <h5 class="fw-bold mb-0 text-light">Organization</h5>
+            <h5 class="fw-normal mb-0 text-dark">Organization</h5>
           </div>
-          <p class="text-light mb-0">{{ org.name }}</p>
+          <p class="text-dark mb-0 fw-bold fs-3">{{ org.name }}</p>
         </div>
       </div>
     </div>
 
     <!-- Quick Actions (Right Side) -->
-    <div class="col-lg-4">
+    <div class="col-lg-4 mt-3">
       <div class="d-flex flex-column gap-2">
         <button type="button" class="btn btn-outline-primary btn-sm w-50" data-bs-toggle="modal" data-bs-target="#editProfileModal" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">
           <i class="bi bi-pencil-square me-2"></i> Edit Profile
@@ -103,21 +103,21 @@
       <h5 class="fw-bold mb-3" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">Management</h5>
     </div>
     <div class="col-md-6 col-lg-4 mb-4">
-      <a href="{{ url_for('manage_users') }}" class="btn btn-dark border border-primary w-100 text-start py-3">
+      <a href="{{ url_for('manage_users') }}" class="btn btn-white border border-primary w-100 text-start py-3 shadow">
         <i class="bi bi-people text-primary me-3"></i>
-        <span class="text-light">Manage Users</span>
+        <span class="text-dark">Manage Users</span>
       </a>
     </div>
     <div class="col-md-6 col-lg-4 mb-4">
-      <a href="{{ url_for('create_event') }}" class="btn btn-dark border border-primary w-100 text-start py-3">
+      <a href="{{ url_for('create_event') }}" class="btn btn-white border border-primary w-100 text-start py-3 shadow">
         <i class="bi bi-calendar-plus text-primary me-3"></i>
-        <span class="text-light">Create Event</span>
+        <span class="text-dark">Create Event</span>
       </a>
     </div>
     <div class="col-md-6 col-lg-4 mb-4">
-      <a href="{{ url_for('manage_events') }}" class="btn btn-dark border border-primary w-100 text-start py-3">
+      <a href="{{ url_for('manage_events') }}" class="btn btn-white border border-primary w-100 text-start py-3 shadow">
         <i class="bi bi-calendar-check text-primary me-3"></i>
-        <span class="text-light">Manage Events</span>
+        <span class="text-dark">Manage Events</span>
       </a>
     </div>
   </div>
@@ -128,14 +128,14 @@
 <!-- Add Organization Modal -->
 <div class="modal fade" id="addOrganizationModal" tabindex="-1" aria-labelledby="addOrganizationModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content bg-dark text-light border-0">
+    <div class="modal-content bg-white text-dark border-0 shadow">
       <form method="POST" action="{{ url_for('add_organization') }}">
         <div class="modal-header border-0">
-          <h5 class="modal-title text-light" id="addOrganizationModalLabel">Add Organization Details</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h5 class="modal-title text-dark" id="addOrganizationModalLabel">Add Organization Details</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
-          <h6 class="mb-3 text-light">Organization Details</h6>
+          <h6 class="mb-3 text-dark">Organization Details</h6>
           <div class="mb-3">
             <input type="text" class="form-control" name="org_name" placeholder="Organization/Business Name" required>
           </div>
@@ -146,7 +146,7 @@
             <input type="text" class="form-control" name="org_tin" placeholder="TIN Number" required>
           </div>
           <hr>
-          <h6 class="mb-3 text-light">Manager Details</h6>
+          <h6 class="mb-3 text-dark">Manager Details</h6>
           <div class="row">
             <div class="col-md-6 mb-3">
               <input type="text" class="form-control" name="manager_first_name" placeholder="First Name" required>
@@ -180,24 +180,24 @@
 <!-- Change Password Modal -->
 <div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content bg-dark text-light border-0">
+    <div class="modal-content bg-white text-dark border-0 shadow">
       <form method="POST" action="{{ url_for('change_password') }}">
         <div class="modal-header border-0">
-          <h5 class="modal-title text-light" id="changePasswordModalLabel">Change Password</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h5 class="modal-title text-dark" id="changePasswordModalLabel">Change Password</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <input type="hidden" name="user_id" value="{{ user.id }}">
           <div class="mb-3">
-            <label class="form-label text-light small">Current Password</label>
+            <label class="form-label text-dark small">Current Password</label>
             <input type="password" class="form-control" name="current_password" placeholder="Enter current password" required>
           </div>
           <div class="mb-3">
-            <label class="form-label text-light small">New Password</label>
+            <label class="form-label text-dark small">New Password</label>
             <input type="password" class="form-control" name="new_password" placeholder="Enter new password" required>
           </div>
           <div class="mb-3">
-            <label class="form-label text-light small">Confirm Password</label>
+            <label class="form-label text-dark small">Confirm Password</label>
             <input type="password" class="form-control" name="confirm_password" placeholder="Confirm new password" required>
           </div>
         </div>
@@ -213,30 +213,30 @@
 <!-- Edit Profile Modal -->
 <div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content bg-dark text-light border-0">
+    <div class="modal-content bg-white text-dark border-0 shadow">
       <form method="POST" action="{{ url_for('edit_profile') }}">
         <div class="modal-header border-0">
-          <h5 class="modal-title text-light" id="editProfileModalLabel">Edit Profile</h5>
-          <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h5 class="modal-title text-dark" id="editProfileModalLabel">Edit Profile</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
         </div>
         <div class="modal-body">
           <input type="hidden" name="user_id" value="{{ user._id }}">
           <div class="row">
             <div class="col-md-6 mb-3">
-              <label class="form-label text-light small">First Name</label>
+              <label class="form-label text-dark small">First Name</label>
               <input type="text" class="form-control" name="first_name" value="{{ user.first_name }}" required>
             </div>
             <div class="col-md-6 mb-3">
-              <label class="form-label text-light small">Last Name</label>
+              <label class="form-label text-dark small">Last Name</label>
               <input type="text" class="form-control" name="last_name" value="{{ user.last_name }}" required>
             </div>
           </div>
           <div class="mb-3">
-            <label class="form-label text-light small">Email</label>
+            <label class="form-label text-dark small">Email</label>
             <input type="email" class="form-control" name="email" value="{{ user.email }}" required>
           </div>
           <div class="mb-3">
-            <label class="form-label text-light small">Contact</label>
+            <label class="form-label text-dark small">Contact</label>
             <input type="text" class="form-control" name="contact" value="{{ user.contact }}">
           </div>
         </div>

@@ -18,7 +18,7 @@
             Order Summary
           </h3>
 
-          <div class="meta text-light d-flex flex-column mt-3">
+          <div class="meta text-dark d-flex flex-column mt-3">
             <p class="chip mb-3">
               <strong>{{ ticket_category }}</strong> ticket: UGX {{ "{:,}".format((total_price / quantity)|int) }} /= each
             </p>
@@ -34,7 +34,7 @@
             <p class="chip"><span style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent; font-weight: bold;">Category: {{ event.category }}</span></p>
           </div>
 
-          <div class="meta text-light d-flex flex-column mt-2">
+          <div class="meta text-dark d-flex flex-column mt-2">
             <p class="chip">📅 {{ event.date.strftime('%d %b %Y') }}</p>
             <p class="chip">
               ⏰ {{ event.start_time.strftime('%I:%M %p') }}
@@ -105,6 +105,7 @@
             <div class="modal-body">
             <p>Complete your payment of <strong>UGX {{ "{:,}".format(total_price|int) }} /=</strong> using MTN MoMo Pay</p>
             <form method="POST" action="{{ url_for('mtn_payment_process') }}" id="mtnForm">
+                <input type="hidden" name="event_id" value="{{ event._id }}">
                 <input type="hidden" name="quantity" value="{{ quantity }}">
                 <input type="hidden" name="ticket_category" value="{{ ticket_category }}">
                 <input type="hidden" name="ticket_price" value="{{ ticket_price }}">
@@ -116,10 +117,10 @@
                 <input type="hidden" name="event_end_time" value="{{ event.end_time.strftime('%I:%M %p') if event.end_time else '' }}">
                 <input type="hidden" name="event_location" value="{{ event.location }}">
                 <input type="hidden" name="event_venue" value="{{ event.venue }}">
-                <input type="hidden" name="payment_method" value="airtel">
+                <input type="hidden" name="payment_method" value="mtn">
                 <div class="mb-3">
                 <label class="form-label">Phone Number</label>
-                <input type="tel" class="form-control" name="phone_number" required>
+                <input type="tel" class="form-control" name="phone_number" pattern="[0-9\s\-\+\(\)]{10,}" inputmode="numeric" placeholder="07..." required>
                 </div>
                 <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

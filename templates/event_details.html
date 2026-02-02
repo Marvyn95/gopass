@@ -18,7 +18,7 @@
             {{ event.title }}
           </h3>
 
-          <div class="meta text-light d-flex flex-column">
+          <div class="meta text-dark d-flex flex-column">
             <p class="chip">📅 {{ event.date.strftime('%d %b %Y') }}</p>
             <p class="chip">
               ⏰ {{ event.start_time.strftime('%I:%M %p') }}
@@ -28,7 +28,7 @@
           </div>
 
           <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div class="venue-info text-light">
+            <div class="venue-info text-dark">
               <i class="bi bi-geo-alt"> Venue: {{ event.venue }}</i>
             </div>
             
@@ -46,10 +46,10 @@
                 <div class="modal fade" id="buyTicketsModal{{ event._id }}" tabindex="-1"
                    aria-labelledby="buyTicketsModalLabel{{ event._id }}" aria-hidden="true">
                 <div class="modal-dialog modal-dialog-centered modal-sm">
-                  <div class="modal-content bg-dark text-light border-0">
+                  <div class="modal-content bg-light text-dark border-0">
                   <div class="modal-header py-2 border-0">
                     <h6 class="modal-title" id="buyTicketsModalLabel{{ event._id }}">Buy Tickets</h6>
-                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
                   </div>
 
                   <form method="POST" action="{{ url_for('buy_tickets') }}">
@@ -97,17 +97,17 @@
           {% endif %}
 
           <div class="flex-fill" style="min-width:250px">
-            <div class="label text-light" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">Details</div>
+            <div class="label text-dark" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">Details</div>
             <div class="card-panel">
               {% if event.description %}
-                <div class="text-light">{{ event.description }}</div>
+                <div class="text-dark">{{ event.description }}</div>
               {% else %}
-                <em class="small-muted text-light">No description provided.</em>
+                <em class="small-muted text-dark">No description provided.</em>
               {% endif %}
 
               <div class="d-flex gap-2 flex-wrap mt-3">
-                <div class="chip text-light">🎵 Event type: {{ event.category }}</div>
-                <div class="chip text-light">🎫 Tickets Available</div>
+                <div class="chip text-dark">🎵 Event type: {{ event.category }}</div>
+                <div class="chip text-dark">🎫 Tickets Available</div>
               </div>
             </div>
           </div>
@@ -117,12 +117,12 @@
       <!-- Ticket Prices -->
       <div class="grid mb-2">
         <div class="left">
-          <div class="label text-light mt-4 fs-5 fw-semibold" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">Ticket Prices</div>
+          <div class="label text-dark mt-4 fs-5 fw-semibold" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">Ticket Prices</div>
           <div class="card-panel">
             {% for category, price in event.ticket_categories.items() %}
               <div class="d-flex justify-content-between py-2 border-bottom border-secondary">
-                <span class="text-light">{{ category|title }}</span>
-                <span class="fw-bold text-light">{% if price != '0' %}UGX {{ "{:,}".format(price|int) }}{% elif price == '0' %}🎉 Free Entry{% endif %}</span>
+                <span class="text-dark">{{ category|title }}</span>
+                <span class="fw-bold text-dark">{% if price != '0' %}UGX {{ "{:,}".format(price|int) }}{% elif price == '0' %}🎉 Free Entry{% endif %}</span>
               </div>
             {% endfor %}
           </div>
@@ -145,25 +145,25 @@
           <!-- Edit Event Modal -->
           <div class="modal fade" id="editEventModal{{ event._id }}" tabindex="-1" aria-labelledby="editEventModalLabel{{ event._id }}" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-lg">
-              <div class="modal-content bg-dark text-light border-0">
+              <div class="modal-content bg-light text-dark border-0">
             <form method="POST" action="{{ url_for('edit_event') }}" enctype="multipart/form-data">
               <input type="hidden" name="event_id" value="{{ event._id }}">
               <div class="modal-header py-2 border-0">
-                <h6 class="modal-title text-light" id="editEventModalLabel{{ event._id }}">Edit Event</h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h6 class="modal-title text-dark" id="editEventModalLabel{{ event._id }}">Edit Event</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body py-2">
                 <div class="mb-2">
-                  <label for="title{{ event._id }}" class="form-label mb-1 text-light">Title</label>
+                  <label for="title{{ event._id }}" class="form-label mb-1 text-dark">Title</label>
                   <input type="text" id="title{{ event._id }}" class="form-control form-control-sm border-dark" name="title" value="{{ event.title }}" required>
                 </div>
                 <div class="mb-2">
-                  <label for="description{{ event._id }}" class="form-label mb-1 text-light">Description</label>
+                  <label for="description{{ event._id }}" class="form-label mb-1 text-dark">Description</label>
                   <textarea id="description{{ event._id }}" class="form-control form-control-sm border-dark" name="description" rows="3" required>{{ event.description }}</textarea>
                 </div>
                 <div class="row">
                   <div class="col-md-6 mb-2">
-                <label for="location{{ event._id }}" class="form-label mb-1 text-light">Location</label>
+                <label for="location{{ event._id }}" class="form-label mb-1 text-dark">Location</label>
                 <select id="location{{ event._id }}" class="form-select form-select-sm border-dark" name="location" required>
                   <option value="{{ event.location }}" selected>{{ event.location }}</option>
                   <option>Kampala</option><option>Jinja</option><option>Mbarara</option>
@@ -172,30 +172,30 @@
                 </select>
                   </div>
                   <div class="col-md-6 mb-2">
-                <label for="venue{{ event._id }}" class="form-label mb-1 text-light">Venue</label>
+                <label for="venue{{ event._id }}" class="form-label mb-1 text-dark">Venue</label>
                 <input type="text" id="venue{{ event._id }}" class="form-control form-control-sm border-dark" name="venue" value="{{ event.venue }}" required>
                   </div>
                 </div>
                 <div class="mb-2">
-                  <label for="image{{ event._id }}" class="form-label mb-1 text-light">Update Event Image</label>
+                  <label for="image{{ event._id }}" class="form-label mb-1 text-dark">Update Event Image</label>
                   <input type="file" id="image{{ event._id }}" class="form-control form-control-sm border-dark" name="event_image" accept="image/*">
                 </div>
                 <div class="row">
                   <div class="col-md-4 mb-2">
-                <label for="date{{ event._id }}" class="form-label mb-1 text-light">Date</label>
+                <label for="date{{ event._id }}" class="form-label mb-1 text-dark">Date</label>
                 <input type="date" id="date{{ event._id }}" class="form-control form-control-sm border-dark" name="date" value="{{ event.date.strftime('%Y-%m-%d') }}" required>
                   </div>
                   <div class="col-md-4 mb-2">
-                <label for="start_time{{ event._id }}" class="form-label mb-1 text-light">Start</label>
+                <label for="start_time{{ event._id }}" class="form-label mb-1 text-dark">Start</label>
                 <input type="time" id="start_time{{ event._id }}" class="form-control form-control-sm border-dark" name="start_time" value="{{ event.start_time.strftime('%H:%M') }}" required>
                   </div>
                   <div class="col-md-4 mb-2">
-                <label for="end_time{{ event._id }}" class="form-label mb-1 text-light">End</label>
+                <label for="end_time{{ event._id }}" class="form-label mb-1 text-dark">End</label>
                 <input type="time" id="end_time{{ event._id }}" class="form-control form-control-sm border-dark" name="end_time" value="{{ event.end_time.strftime('%H:%M') }}" required>
                   </div>
                 </div>
                 <div class="mb-2">
-                  <label for="category{{ event._id }}" class="form-label mb-1 text-light">Event Category</label>
+                  <label for="category{{ event._id }}" class="form-label mb-1 text-dark">Event Category</label>
                   <select id="category{{ event._id }}" class="form-select form-select-sm border-dark" name="category" required>
                 <option value="{{ event.category }}" selected>{{ event.category }}</option>
                 <option>Music</option>
@@ -209,7 +209,7 @@
                   </select>
                 </div>
                 <div class="col-md-6">
-                  <label class="form-label text-light">Ticket Categories</label>
+                  <label class="form-label text-dark">Ticket Categories</label>
                   <div id="ticket-types-list">
                 {% for key, value in event.ticket_categories.items() %}
                 <div class="input-group mb-2 ticket-type-item">
@@ -238,12 +238,12 @@
           <!-- Delete Event Modal -->
           <div class="modal fade" id="deleteEventModal{{ event._id }}" tabindex="-1" aria-labelledby="deleteEventModalLabel{{ event._id }}" aria-hidden="true">
             <div class="modal-dialog modal-dialog-centered modal-sm">
-              <div class="modal-content bg-dark text-light border-0">
+              <div class="modal-content bg-light text-dark border-0">
             <form method="POST" action="{{ url_for('delete_event')}}">
                 <input type="hidden" name="event_id" value="{{ event._id }}">
               <div class="modal-header py-2 border-0">
-                <h6 class="modal-title text-light" id="deleteEventModalLabel{{ event._id }}">Delete Event</h6>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h6 class="modal-title text-dark" id="deleteEventModalLabel{{ event._id }}">Delete Event</h6>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
               </div>
               <div class="modal-body py-2">
                 <p>Are you sure you want to delete this event?</p>

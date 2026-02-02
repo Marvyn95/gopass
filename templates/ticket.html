@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+{% block content %}
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+
+<div class="container">
+  <div class="row justify-content-center">
+    <div class="event-card col-md-8" role="region" aria-label="Event details">
+
+      <div class="event-header">
+        <div class="d-flex flex-wrap flex-column">
+          <h3 class="title"
+              style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899);
+             -webkit-background-clip: text;
+             background-clip: text;
+             color: transparent;
+             -webkit-text-fill-color: transparent;">
+            Download your ticket(s)
+          </h3>
+        </div>
+
+        {% for ticket_io_str in ticket_io_strs %}
+            <div class="mt-4 d-flex gap-3 flex-wrap">
+                <div class="ticket-display">
+                    <img src="data:image/png;base64,{{ ticket_io_str }}" class="img-fluid" alt="Ticket Image">
+                </div>
+            </div>
+
+            <div class="mt-3 d-flex justify-content-start">
+                <button class="btn btn-sm btn-primary" onclick="downloadTicket()">Download</button>
+            </div>
+
+            <script>
+            function downloadTicket() {
+                const link = document.createElement('a');
+                link.href = 'data:image/png;base64,{{ ticket_io_str }}';
+                link.download = 'ticket.png';
+                link.click();
+            }
+            </script>
+        {% endfor %}
+
+      </div>
+
+
+    </div>
+  </div>
+</div>
+
+{% endblock %}

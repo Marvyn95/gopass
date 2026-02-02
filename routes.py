@@ -8,6 +8,7 @@ import json
 from io import BytesIO
 import base64
 from PIL import Image, ImageDraw, ImageFont
+import secrets
 
 
 @app.route('/')
@@ -463,127 +464,251 @@ def airtel_payment_process():
 
         event = db.events.find_one({'_id': ObjectId(event_id)})
 
-
         # logic for mobile money api integration goes here
-        # -----------------------------------------------------------------------
-        # -----------------------------------------------------------------------
-        # -----------------------------------------------------------------------
+        transaction_id = secrets.token_hex(8)
 
+        ticket_io_strs = []
+        for i in range(int(quantity)):
+            booking_id = db.bookings.insert_one({
+                'event_id': ObjectId(event_id),
+                'organization_id': ObjectId(event.get('organization_id')),
+                'ticket_category': ticket_category,
+                'ticket_price': ticket_price,
+                'quantity': int(quantity),
+                'total_price': float(total_price),
+                'payment_method': payment_method,
+                'phone_number': phone_number,
+                'status': 'paid',
+                'booking_date': datetime.now(),
+                'transaction_id': transaction_id
+            }).inserted_id
 
-        booking_id = db.bookings.insert_one({
-            'event_id': ObjectId(event_id),
-            'organization_id': ObjectId(event.get('organization_id')),
-            'ticket_category': ticket_category,
-            'ticket_price': ticket_price,
-            'quantity': int(quantity),
-            'total_price': float(total_price),
-            'payment_method': payment_method,
-            'phone_number': phone_number,
-            'status': 'paid',
-            'booking_date': datetime.now()
-        }).inserted_id
+            qrcode_details = {
+                'event_id': event_id,
+                'event_title': event_title,
+                'event_category': event_category,
+                'event_date': event_date,
+                'start_time': event_start_time,
+                'end_time': event_end_time,
+                'event_location': event_location,
+                'event_venue': event_venue,
+                'ticket_category': ticket_category,
+                'ticket_price': ticket_price,
+                'phone_number': phone_number,
+                'booking_id': str(booking_id),
+                'transaction_id': transaction_id
+            }
 
+            qr = qrcode.QRCode(version=1, box_size=10, border=5)
+            qr.add_data(json.dumps(qrcode_details))
+            qr.make(fit=True)
 
-        qrcode_details = {
-            'event_id': event_id,
-            'event_title': event_title,
-            'event_category': event_category,
-            'event_date': event_date,
-            'start_time': event_start_time,
-            'end_time': event_end_time,
-            'event_location': event_location,
-            'event_venue': event_venue,
-            'ticket_category': ticket_category,
-            'ticket_price': ticket_price,
-            'phone_number': phone_number,
-            'booking_id': str(booking_id)
-        }
+            img = qr.make_image(fill_color="black", back_color="white")
+            img_io = BytesIO()
+            img.save(img_io, 'PNG')
+            img_io.seek(0)
+            qr_code = base64.b64encode(img_io.getvalue()).decode()
 
-        qr = qrcode.QRCode(version=1, box_size=10, border=5)
-        qr.add_data(json.dumps(qrcode_details))
-        qr.make(fit=True)
+            db.bookings.update_one(
+                {'_id': booking_id},
+                {'$set': {'qr_code': qr_code}}
+            )
 
-        img = qr.make_image(fill_color="black", back_color="white")
-        img_io = BytesIO()
-        img.save(img_io, 'PNG')
-        img_io.seek(0)
-        qr_code = base64.b64encode(img_io.getvalue()).decode()
+            # Creating ticket
+            ticket_width, ticket_height = 600, 200
+            ticket = Image.new('RGB', (ticket_width, ticket_height), color='#f0f0f0')
+            draw = ImageDraw.Draw(ticket)
 
-        db.bookings.update_one(
-            {'_id': booking_id},
-            {'$set': {'qr_code': qr_code}}
-        )
+            # Load event image
+            event_image = Image.open(f"static/event_images/{event.get('image')}")
+            event_image = event_image.resize((ticket_width, ticket_height))
+            event_image.putalpha(int(255 * 0.2))  # Set opacity to 20%
+            ticket.paste(event_image, (0, 0), event_image)
 
-        # Creating ticket
-        ticket_width, ticket_height = 600, 200
-        ticket = Image.new('RGB', (ticket_width, ticket_height), color='#f0f0f0')
-        draw = ImageDraw.Draw(ticket)
+            # Add gradient-like border
+            # draw.rectangle([10, 10, ticket_width-10, ticket_height-10], outline="#000000", width=3)
 
-        # Load event image
-        event_image = Image.open(f"static/event_images/{event.get('image')}")
-        event_image = event_image.resize((ticket_width, ticket_height))
-        event_image.putalpha(int(255 * 0.2))  # Set opacity to 30%
-        ticket.paste(event_image, (0, 0), event_image)
+            # Add event title in header
+            try:
+                title_font = ImageFont.truetype("arial.ttf", 20)
+                detail_font = ImageFont.truetype("DejaVuSans.ttf", 16)  # Changed to a sans-serif font
+            except:
+                title_font = ImageFont.load_default()
+                detail_font = ImageFont.load_default()
 
-        # Add gradient-like border
-        # draw.rectangle([10, 10, ticket_width-10, ticket_height-10], outline="#000000", width=3)
+            draw.text((30, 25), f"{event_title}", fill="#cb2247", font=title_font, weight="bold")
 
-        # Add event title in header
-        try:
-            title_font = ImageFont.truetype("arial.ttf", 20)
-            detail_font = ImageFont.truetype("DejaVuSans.ttf", 16)  # Changed to a sans-serif font
-        except:
-            title_font = ImageFont.load_default()
-            detail_font = ImageFont.load_default()
-
-        draw.text((30, 25), f"{event_title}", fill="#cb2247", font=title_font, weight="bold")
-
-        # Add event details text on the left side
-        y_offset = 60
-        line_height = 25
-        details = [
-            f"{event_date}  |  {event_start_time} - {event_end_time}",
-            f"{event_location}  |  {event_venue}",
-            f"Ticket : {ticket_category}  |  Qty : {quantity}",
-            f"Price : {ticket_price} UGX",
-            f"Booking ID : {str(booking_id)}"
-        ]
+            # Add event details text on the left side
+            y_offset = 60
+            line_height = 25
+            details = [
+                f"{event_date}  |  {event_start_time} - {event_end_time}",
+                f"{event_location}  |  {event_venue}",
+                f"Ticket : {ticket_category}  |  Qty : {quantity}",
+                f"Price : {ticket_price} UGX",
+                f"Booking ID : {str(booking_id)}"
+            ]
         
-        for detail in details:
-            draw.text((30, y_offset), detail, fill='#2c3e50', font=detail_font)
-            y_offset += line_height
+            for detail in details:
+                draw.text((30, y_offset), detail, fill='#2c3e50', font=detail_font)
+                y_offset += line_height
 
-        # Add vertical line in the middle
-        mid_x = ticket_width // 2
-        draw.line([(mid_x, 15), (mid_x, ticket_height - 15)], fill="#000000", width=2)
+            # Add vertical line in the middle
+            mid_x = ticket_width // 2
+            draw.line([(mid_x, 15), (mid_x, ticket_height - 15)], fill="#000000", width=2)
 
-        # Add QR code to the right side
-        qr_img = Image.open(BytesIO(base64.b64decode(qr_code)))
-        qr_img = qr_img.resize((150, 150))
-        ticket.paste(qr_img, (390, 25))
+            # Add QR code to the right side
+            qr_img = Image.open(BytesIO(base64.b64decode(qr_code)))
+            qr_img = qr_img.resize((150, 150))
+            ticket.paste(qr_img, (390, 25))
 
-        # Save ticket
-        ticket_io = BytesIO()
-        ticket.save(ticket_io, 'PNG')
-        ticket_io.seek(0)
+            # Save ticket
+            ticket_io = BytesIO()
+            ticket.save(ticket_io, 'PNG')
+            ticket_io.seek(0)
 
-        db.bookings.update_one(
-            {'_id': booking_id},
-            {'$set': {'ticket': base64.b64encode(ticket_io.getvalue()).decode()}}
-        )
-        
+            db.bookings.update_one(
+                {'_id': booking_id},
+                {'$set': {'ticket': base64.b64encode(ticket_io.getvalue()).decode()}}
+            )
 
+            ticket_io_str = base64.b64encode(ticket_io.getvalue()).decode()
+            ticket_io_strs.append(ticket_io_str)
+                
         flash('Payment done and dusted', 'success')
-        return send_file(ticket_io, mimetype='image/png', as_attachment=True, download_name=f'{event_title}_{booking_id}_ticket.png')
+        return render_template('ticket.html', event=event, ticket_io_strs=ticket_io_strs)
     
 
 @app.route('/mtn_payment_process', methods=['POST'])
 def mtn_payment_process():
     if request.method == 'POST':
         event_id = request.form['event_id']
+        quantity = request.form['quantity']
+        ticket_category = request.form['ticket_category']
+        ticket_price = request.form['ticket_price']
+        total_price = request.form['total_price']
+        event_title = request.form['event_title']
+        event_category = request.form['event_category']
+        event_date = request.form['event_date']
+        event_start_time = request.form['event_start_time']
+        event_end_time = request.form['event_end_time']
+        event_location = request.form['event_location']
+        event_venue = request.form['event_venue']
+        payment_method = request.form['payment_method']
+        phone_number = request.form['phone_number'].strip()
 
-        print(event_id)
+        event = db.events.find_one({'_id': ObjectId(event_id)})
+
+        # logic for mobile money api integration goes here
+        transaction_id = secrets.token_hex(8)
+
+        ticket_io_strs = []
+        for i in range(int(quantity)):
+            booking_id = db.bookings.insert_one({
+                'event_id': ObjectId(event_id),
+                'organization_id': ObjectId(event.get('organization_id')),
+                'ticket_category': ticket_category,
+                'ticket_price': ticket_price,
+                'quantity': int(quantity),
+                'total_price': float(total_price),
+                'payment_method': payment_method,
+                'phone_number': phone_number,
+                'status': 'paid',
+                'booking_date': datetime.now(),
+                'transaction_id': transaction_id
+            }).inserted_id
+
+            qrcode_details = {
+                'event_id': event_id,
+                'event_title': event_title,
+                'event_category': event_category,
+                'event_date': event_date,
+                'start_time': event_start_time,
+                'end_time': event_end_time,
+                'event_location': event_location,
+                'event_venue': event_venue,
+                'ticket_category': ticket_category,
+                'ticket_price': ticket_price,
+                'phone_number': phone_number,
+                'booking_id': str(booking_id),
+                'transaction_id': transaction_id
+            }
+
+            qr = qrcode.QRCode(version=1, box_size=10, border=5)
+            qr.add_data(json.dumps(qrcode_details))
+            qr.make(fit=True)
+
+            img = qr.make_image(fill_color="black", back_color="white")
+            img_io = BytesIO()
+            img.save(img_io, 'PNG')
+            img_io.seek(0)
+            qr_code = base64.b64encode(img_io.getvalue()).decode()
+
+            db.bookings.update_one(
+                {'_id': booking_id},
+                {'$set': {'qr_code': qr_code}}
+            )
+
+            # Creating ticket
+            ticket_width, ticket_height = 600, 200
+            ticket = Image.new('RGB', (ticket_width, ticket_height), color='#f0f0f0')
+            draw = ImageDraw.Draw(ticket)
+
+            # Load event image
+            event_image = Image.open(f"static/event_images/{event.get('image')}")
+            event_image = event_image.resize((ticket_width, ticket_height))
+            event_image.putalpha(int(255 * 0.2))  # Set opacity to 20%
+            ticket.paste(event_image, (0, 0), event_image)
+
+            # Add gradient-like border
+            # draw.rectangle([10, 10, ticket_width-10, ticket_height-10], outline="#000000", width=3)
+
+            # Add event title in header
+            try:
+                title_font = ImageFont.truetype("arial.ttf", 20)
+                detail_font = ImageFont.truetype("DejaVuSans.ttf", 16)  # Changed to a sans-serif font
+            except:
+                title_font = ImageFont.load_default()
+                detail_font = ImageFont.load_default()
+
+            draw.text((30, 25), f"{event_title}", fill="#cb2247", font=title_font, weight="bold")
+
+            # Add event details text on the left side
+            y_offset = 60
+            line_height = 25
+            details = [
+                f"{event_date}  |  {event_start_time} - {event_end_time}",
+                f"{event_location}  |  {event_venue}",
+                f"Ticket : {ticket_category}  |  Qty : {quantity}",
+                f"Price : {ticket_price} UGX",
+                f"Booking ID : {str(booking_id)}"
+            ]
         
+            for detail in details:
+                draw.text((30, y_offset), detail, fill='#2c3e50', font=detail_font)
+                y_offset += line_height
 
+            # Add vertical line in the middle
+            mid_x = ticket_width // 2
+            draw.line([(mid_x, 15), (mid_x, ticket_height - 15)], fill="#000000", width=2)
+
+            # Add QR code to the right side
+            qr_img = Image.open(BytesIO(base64.b64decode(qr_code)))
+            qr_img = qr_img.resize((150, 150))
+            ticket.paste(qr_img, (390, 25))
+
+            # Save ticket
+            ticket_io = BytesIO()
+            ticket.save(ticket_io, 'PNG')
+            ticket_io.seek(0)
+
+            db.bookings.update_one(
+                {'_id': booking_id},
+                {'$set': {'ticket': base64.b64encode(ticket_io.getvalue()).decode()}}
+            )
+
+            ticket_io_str = base64.b64encode(ticket_io.getvalue()).decode()
+            ticket_io_strs.append(ticket_io_str)
+                
         flash('Payment done and dusted', 'success')
-        return redirect(url_for('event_details', event_id=event_id))
+        return render_template('ticket.html', event=event, ticket_io_strs=ticket_io_strs)
