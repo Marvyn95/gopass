@@ -19,10 +19,10 @@
           </h3>
         </div>
 
-        {% for ticket_io_str in ticket_io_strs %}
+        {% for i in ticket_io_strs %}
             <div class="mt-4 d-flex gap-3 flex-wrap">
                 <div class="ticket-display">
-                    <img src="data:image/png;base64,{{ ticket_io_str }}" class="img-fluid" alt="Ticket Image">
+                    <img src="data:image/png;base64,{{ i.ticket_io_str }}" class="img-fluid" alt="Ticket Image">
                 </div>
             </div>
 
@@ -33,8 +33,8 @@
             <script>
             function downloadTicket() {
                 const link = document.createElement('a');
-                link.href = 'data:image/png;base64,{{ ticket_io_str }}';
-                link.download = 'ticket.png';
+                link.href = 'data:image/png;base64,{{ i.ticket_io_str }}';
+                link.download = '{{ i.event_title }}_ticket.png';
                 link.click();
             }
             </script>

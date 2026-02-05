@@ -573,9 +573,9 @@ def airtel_payment_process():
             )
 
             ticket_io_str = base64.b64encode(ticket_io.getvalue()).decode()
-            ticket_io_strs.append(ticket_io_str)
+            ticket_io_strs.append({'ticket_io_str': ticket_io_str, 'ticket_id': str(booking_id), 'event_title': event_title})
                 
-        flash('Payment done and dusted', 'success')
+        flash('Payment Processed Successfully', 'success')
         return render_template('ticket.html', event=event, ticket_io_strs=ticket_io_strs)
     
 
@@ -708,7 +708,37 @@ def mtn_payment_process():
             )
 
             ticket_io_str = base64.b64encode(ticket_io.getvalue()).decode()
-            ticket_io_strs.append(ticket_io_str)
+            ticket_io_strs.append({'ticket_io_str': ticket_io_str, 'ticket_id': str(booking_id), 'event_title': event_title})
                 
-        flash('Payment done and dusted', 'success')
+        flash('Payment Processed Successfully', 'success')
         return render_template('ticket.html', event=event, ticket_io_strs=ticket_io_strs)
+    
+
+@app.route('/validation')
+def validation():
+    return render_template('validation.html')
+
+@app.route('/validate_qr', methods=['POST'])
+def validate_qr():
+    if request.method == 'POST':
+        qr_data = request.form.get('qr_data')
+        try:
+            qr_details = json.loads(qr_data)
+            booking_id = qr_details.get('booking_id')
+            booking = db.bookings.find_one({'_id': ObjectId(booking_id)})
+            event_details = db.events.find_one({'_id': ObjectId(booking.get('event_id'))}) if booking else None
+            if not booking:
+                flash('Invalid QR Code. Booking not found.', 'danger')
+                return redirect(request.referrer)
+            if booking.get('status') == 'used':
+                flash('This ticket has already been used.', 'warning')
+                return redirect(request.referrer)
+            db.bookings.update_one(
+                {'_id': ObjectId(booking_id)},
+                {'$set': {'status': 'used'}}
+            )
+            flash(f'Ticket is valid for {event_details.get("title") if event_details else "Unknown Event"}.', 'success')
+        except Exception as e:
+            flash('Error processing QR Code. Please try again.', 'danger')
+
+    return redirect(request.referrer)
