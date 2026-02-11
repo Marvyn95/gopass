@@ -1,183 +1,358 @@
 {% extends "base.html" %}
-
 {% block content %}
 
-<div class="container">
-    <div class="row mb-4 mt-1" style="background: url('{{ url_for('static', filename='images/vecteezy_cultural-music-performance-featuring-a-group-of-women_69349378.jpg') }}') center center/cover no-repeat; min-height: 260px; min-width: 100%; height: 340px; border-radius: 1rem; box-shadow: 0 4px 24px rgba(0,0,0,0.2); position: relative;">
-        <div class="col-12 d-flex flex-column justify-content-center align-items-start" style="background: rgba(0,0,0,0.55); min-height: 260px; height: 100%; border-radius: 1rem;">
-            <h2 class="text-light fw-bold mb-2" style="font-size: 2.5rem;">Welcome to <span class="" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">GoPass</span></h2>
-            <h5 class="text-light mb-3">Discover Events, Book Tickets, Manage events with ease</h5>
-            <p class="text-light mb-1"></p>
-            <p class="text-light mb-0">A robust solution for digital ticketing, event promotion, and real-time ticket validation.</p>
-        </div>
-    </div>
+<div class="container py-5">
 
-    <div class="row mt-1">
-        <h4 class="card-title fw-bold mb-0 text-center mb-2" style="font-size: 1.5rem; background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">
-            Why You Should Choose GoPass?
-        </h4>
+    <!-- ================= HERO ================= -->
+    <div class="row mb-5 mt-4">
+        <div class="col-12 rounded-4 shadow-lg p-0 overflow-hidden"
+             style="background:url('{{ url_for('static', filename='images/vecteezy_cultural-music-performance-featuring-a-group-of-women_69349378.jpg') }}') center/cover no-repeat;height:380px;">
 
-        <div class="col-md-4 mb-1">
-            <div class="card h-100 shadow-lg border-0" style="background: #ffffff; border-radius: 1rem; border: 2px solid; border-image: linear-gradient(135deg, #8ec5ff 0%, #3b82f6 60%, #ba1a6a 100%) 1;">
-                <div class="card-body" style="background: transparent; border-radius: 1rem;">
-                    <div class="d-flex align-items-center justify-content-center mb-1">
-                        <span class="me-3" style="font-size: 2.2rem; background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">
-                            <i class="bi bi-people-fill"></i>
-                        </span>
-                    </div>
-                    <div class="d-flex align-items-center mb-3">
-                        <h4 class="card-title fw-bold mb-0" style="font-size: 1.5rem; background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">
-                            Empower Event Organizers
-                        </h4>
-                    </div>
-                    <p class="card-text text-dark text-justify" style="text-align: justify;">
-                        Publish events, sell and validate tickets, streamline attendee access with GoPass. Our platform makes event ticket management simple, efficient, and secure for organizers and attendees alike.
-                    </p>
-                    <a href="{{ url_for('about') }}" class="text-primary fw-semibold text-decoration-none">
-                        Read more <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
+            <div class="h-100 w-100 d-flex flex-column justify-content-center px-5"
+                 style="background:rgba(0,0,0,0.65);">
 
-        <div class="col-md-4 mb-1">
-            <div class="card h-100 shadow-lg border-0" style="background: #ffffff; border-radius: 1rem; border: 2px solid; border-image: linear-gradient(135deg, #8ec5ff 0%, #3b82f6 60%, #ba1a6a 100%) 1;">
-                <div class="card-body" style="background: transparent; border-radius: 1rem;">
-                    <div class="d-flex align-items-center justify-content-center mb-1">
-                        <span class="me-3" style="font-size: 2.2rem; background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">
-                            <i class="bi bi-ticket-perforated-fill"></i>
-                        </span>
-                    </div>
-                    <div class="d-flex align-items-center mb-3">
-                        <h4 class="card-title fw-bold mb-0" style="font-size: 1.5rem; background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">
-                            Seamless Ticket Booking
-                        </h4>
-                    </div>
-                    <p class="card-text text-dark text-justify" style="text-align: justify;">
-                        Attendees can book single or multiple tickets for events effortlessly from the comfort of their home. GoPass delivers secure digital tickets, each with a unique digital signature for authenticity and instant validation at entry.
-                    </p>
-                    <a href="{{ url_for('about') }}" class="text-primary fw-semibold text-decoration-none">
-                        Read more <i class="bi bi-arrow-right"></i>
-                    </a>
-                </div>
-            </div>
-        </div>
+                <h1 class="fw-bold text-light mb-3">
+                    Welcome to <span class="text-primary">GoPass</span>
+                </h1>
 
-        <div class="col-md-4 mb-1">
-            <div class="card h-100 shadow-lg border-0" style="background: #ffffff; border-radius: 1rem; border: 2px solid; border-image: linear-gradient(135deg, #8ec5ff 0%, #3b82f6 60%, #ba1a6a 100%) 1;">
-            <div class="card-body" style="background: transparent; border-radius: 1rem;">
-                <div class="d-flex align-items-center justify-content-center mb-1">
-                <span class="me-3" style="font-size: 2.2rem; background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">
-                    <i class="bi bi-shield-check"></i>
-                </span>
-                </div>
-                <div class="d-flex align-items-center mb-3">
-                <h4 class="card-title fw-bold mb-0" style="font-size: 1.5rem; background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">
-                    Secure & Reliable Platform
-                </h4>
-                </div>
-                <p class="card-text text-dark text-justify" style="text-align: justify;">
-                GoPass uses advanced security protocols to protect your data and transactions. Enjoy peace of mind with encrypted payments, fraud prevention, and real-time ticket validation for every event.
+                <h5 class="text-light mb-3">
+                    Smart Event Ticketing & Management Platform
+                </h5>
+
+                <p class="text-light mb-4 col-md-8">
+                    Create events, sell tickets, validate entries,
+                    and manage attendance — all in one secure platform.
                 </p>
-                <a href="{{ url_for('about') }}" class="text-primary fw-semibold text-decoration-none">
-                Read more <i class="bi bi-arrow-right"></i>
-                </a>
+
+                <div>
+                    <a href="{{ url_for('signup') }}"
+                       class="btn btn-primary btn-lg me-3 px-4 mt-2">
+                        Get Started
+                    </a>
+
+                    <a href="{{ url_for('about') }}"
+                       class="btn btn-outline-light btn-lg px-4 mt-2">
+                        Learn More
+                    </a>
+                </div>
+
             </div>
+        </div>
+    </div>
+
+
+
+    <!-- ================= WHY CHOOSE ================= -->
+    <div class="row mb-5">
+
+        <div class="col-12 text-center mb-4">
+            <h3 class="fw-bold text-primary">
+                Why Choose GoPass?
+            </h3>
+            <p class="text-muted col-md-8 mx-auto">
+                Everything you need to manage ticketing and attendance for your events,
+                built for organizers and attendees.
+            </p>
+        </div>
+
+
+        {% set cards = [
+        ("bi-people-fill","Empower Organizers","Publish events, manage sales, and control entry with ease."),
+        ("bi-ticket-perforated-fill","Easy Booking","Fast, secure ticket booking from any device."),
+        ("bi-shield-check","Secure Platform","Encrypted payments and fraud protection.")
+        ] %}
+
+        {% for icon,title,desc in cards %}
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 border-0 shadow-sm rounded-4">
+
+                <div class="card-body p-4 text-center">
+
+                    <div class="mb-3 text-primary fs-1">
+                        <i class="bi {{ icon }}"></i>
+                    </div>
+
+                    <h5 class="fw-bold text-primary mb-3">
+                        {{ title }}
+                    </h5>
+
+                    <p class="text-muted mb-3">
+                        {{ desc }}
+                    </p>
+
+                    <a href="{{ url_for('about') }}"
+                       class="fw-semibold text-primary text-decoration-none">
+                        Read more <i class="bi bi-arrow-right"></i>
+                    </a>
+
+                </div>
             </div>
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+
+    <!-- ================= HOW IT WORKS ================= -->
+    <div class="row mb-5 bg-light py-5 rounded-4">
+
+        <div class="col-12 text-center mb-4">
+            <h3 class="fw-bold text-primary">
+                How GoPass Works
+            </h3>
+        </div>
+
+        <div class="col-md-4 text-center mb-3">
+            <i class="bi bi-pencil-square text-primary fs-1 mb-3"></i>
+            <h5 class="fw-bold">Create Event</h5>
+            <p class="text-muted">
+                Register and publish your event in minutes.
+            </p>
+        </div>
+
+        <div class="col-md-4 text-center mb-3">
+            <i class="bi bi-cart-check text-primary fs-1 mb-3"></i>
+            <h5 class="fw-bold">Sell Tickets</h5>
+            <p class="text-muted">
+                Attendees book securely online.
+            </p>
+        </div>
+
+        <div class="col-md-4 text-center mb-3">
+            <i class="bi bi-qr-code-scan text-primary fs-1 mb-3"></i>
+            <h5 class="fw-bold">Scan & Verify</h5>
+            <p class="text-muted">
+                Validate tickets instantly at entry.
+            </p>
         </div>
 
     </div>
 
-        <div class="row mt-3">
-            <div class="col-12">
-                <div class="card flex-md-row align-items-center bg-light border-0 shadow-lg" style="border-radius: 1rem;">
-                    <div class="card-body col-md-7 d-flex flex-column justify-content-center">
-                        <h4 class="fw-bold mb-3" style="font-size: 1.4rem; background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">
-                            <span class="me-2" style="font-size: 1.4rem; color: #3b82f6;"><i class="bi bi-list-stars"></i></span> Key Features
+
+
+    <!-- ================= STATS ================= -->
+    <div class="row mb-5 text-center">
+
+        <div class="col-md-3 mb-3">
+            <h2 class="fw-bold text-primary">500+</h2>
+            <p class="text-muted">Events Hosted</p>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <h2 class="fw-bold text-primary">50K+</h2>
+            <p class="text-muted">Tickets Sold</p>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <h2 class="fw-bold text-primary">98%</h2>
+            <p class="text-muted">Success Rate</p>
+        </div>
+
+        <div class="col-md-3 mb-3">
+            <h2 class="fw-bold text-primary">24/7</h2>
+            <p class="text-muted">Support</p>
+        </div>
+
+    </div>
+
+
+
+    <!-- ================= FEATURES ================= -->
+    <div class="row mb-5">
+
+        <div class="col-12">
+
+            <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+
+                <div class="row g-0 align-items-center">
+
+                    <div class="col-md-7 p-4">
+
+                        <h4 class="fw-bold text-primary mb-4">
+                            <i class="bi bi-list-stars me-2"></i>
+                            Key Features
                         </h4>
-                        <ul class="list-unstyled mb-0">
-                            <li class="mb-1 d-flex align-items-start">
-                                <span class="me-3" style="font-size: 1.6rem; color: #3b82f6;"><i class="bi bi-calendar2-plus"></i></span>
-                                <div class="text-dark">
-                                    <strong>Event Creation</strong> Publish event details in minutes.
-                                </div>
+
+                        <ul class="list-unstyled">
+
+                            <li class="mb-3 d-flex">
+                                <i class="bi bi-calendar2-plus text-primary me-3"></i>
+                                Event Creation
                             </li>
-                            <li class="mb-1 d-flex align-items-start">
-                                <span class="me-3" style="font-size: 1.6rem; color: #ec4899;"><i class="bi bi-credit-card-2-front"></i></span>
-                                <div class="text-dark">
-                                    <strong>Online Ticket Sales</strong> Secure, fast, and mobile-friendly.
-                                </div>
+
+                            <li class="mb-3 d-flex">
+                                <i class="bi bi-credit-card-2-front text-primary me-3"></i>
+                                Online Ticket Sales
                             </li>
-                            <li class="mb-1 d-flex align-items-start">
-                                <span class="me-3" style="font-size: 1.6rem; color: #8ec5ff;"><i class="bi bi-qr-code-scan"></i></span>
-                                <div class="text-dark">
-                                    <strong>Ticket Validation</strong> QR code scanning at entry.
-                                </div>
+
+                            <li class="mb-3 d-flex">
+                                <i class="bi bi-qr-code-scan text-primary me-3"></i>
+                                QR Validation
                             </li>
-                            <li class="mb-1 d-flex align-items-start">
-                                <span class="me-3" style="font-size: 1.6rem; color: #3b82f6;"><i class="bi bi-bar-chart-line"></i></span>
-                                <div class="text-dark">
-                                    <strong>Analytics Dashboard</strong> Track sales, attendance, and revenue.
-                                </div>
+
+                            <li class="mb-3 d-flex">
+                                <i class="bi bi-bar-chart-line text-primary me-3"></i>
+                                Sales Analytics
                             </li>
-                            <li class="mb-1 d-flex align-items-start">
-                                <span class="me-3" style="font-size: 1.6rem; color: #ec4899;"><i class="bi bi-phone"></i></span>
-                                <div class="text-dark">
-                                    <strong>Multi-Device Access</strong> Cross‑platform web application designed for both desktop and mobile use.
-                                </div>
+
+                            <li class="d-flex">
+                                <i class="bi bi-phone text-primary me-3"></i>
+                                Mobile Friendly
                             </li>
+
                         </ul>
+
                     </div>
-                    <div class="col-md-5 d-none d-md-block p-0">
-                        <div style="width:100%; height:220px; overflow:hidden; border-radius: 1rem;">
-                            <img src="{{ url_for('static', filename='images/fd96a25f8d0af4fc091016ef6e80c052.jpg') }}" alt="GoPass Key Features" class="img-fluid w-100 h-100" style="object-fit: cover; object-position: center; height: 100%; width: 100%;">
-                        </div>
+
+
+                    <div class="col-md-5 d-none d-md-block">
+
+                        <img src="{{ url_for('static', filename='images/fd96a25f8d0af4fc091016ef6e80c052.jpg') }}"
+                             class="img-fluid w-100 h-100"
+                             style="object-fit:cover;"
+                             alt="Features">
+
                     </div>
+
                 </div>
+
             </div>
+
+        </div>
+    </div>
+
+
+
+    <!-- ================= TESTIMONIALS ================= -->
+    <div class="row mb-5 bg-light py-5 rounded-4">
+
+        <div class="col-12 text-center mb-4">
+            <h3 class="fw-bold text-primary">
+                What Our Users Say
+            </h3>
         </div>
 
-        <div class="row mt-4">
-            <div class="col-12">
-                <div class="card bg-light border-0 shadow-sm" style="border-radius: 1rem;">
-                    <div class="card-body d-flex flex-column flex-md-row align-items-center justify-content-between">
-                        <div class="mb-3 mb-md-0">
-                            <h5 class="fw-bold mb-2" style="font-size: 1.3rem; background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">
-                                About GoPass
-                            </h5>
-                            <p class="text-dark mb-2" style="max-width: 500px;">
-                                GoPass is dedicated to transforming the event experience for organizers and attendees. Our mission is to make ticketing, event management, and entry seamless, secure, and enjoyable for everyone.
-                            </p>
-                            <a href="{{ url_for('about') }}" class="text-primary fw-semibold text-decoration-none">
-                                Learn more about us <i class="bi bi-arrow-right"></i>
-                            </a>
-                        </div>
-                        <div>
-                            <h6 class="fw-bold text-dark mb-2">Connect with us</h6>
-                            <div class="d-flex justify-content-between align-items-center text-dark">
-                                <a href="https://facebook.com" target="_blank" class="text-decoration-none text-dark me-4" title="Facebook">
-                                    <i class="bi bi-facebook" style="font-size: 1.7rem;"></i>
-                                </a>
-                                <a href="https://twitter.com" target="_blank" class="text-decoration-none text-dark me-4" title="Twitter">
-                                    <i class="bi bi-twitter" style="font-size: 1.7rem;"></i>
-                                </a>
-                                <a href="https://instagram.com" target="_blank" class="text-decoration-none text-dark me-4" title="Instagram">
-                                    <i class="bi bi-instagram" style="font-size: 1.7rem;"></i>
-                                </a>
-                                <a href="https://tiktok.com" target="_blank" class="text-decoration-none text-dark me-4" title="TikTok">
-                                    <i class="bi bi-tiktok" style="font-size: 1.7rem;"></i>
-                                </a>
-                                <a href="mailto:info@gopass.com" class="text-decoration-none text-dark" title="Email">
-                                    <i class="bi bi-envelope-fill" style="font-size: 1.7rem;"></i>
-                                </a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
+        {% set reviews = [
+        ("Sarah K.","Event Organizer","GoPass helped us manage over 2,000 guests smoothly."),
+        ("Michael T.","Attendee","Booking tickets is fast and reliable."),
+        ("David M.","Promoter","Our revenue tracking improved instantly.")
+        ] %}
+
+        {% for name,role,msg in reviews %}
+
+        <div class="col-md-4 mb-3">
+
+            <div class="card border-0 shadow-sm p-3 h-100">
+
+                <p class="text-muted">
+                    “{{ msg }}”
+                </p>
+
+                <h6 class="fw-bold mb-0">{{ name }}</h6>
+                <small class="text-muted">{{ role }}</small>
+
             </div>
+
+        </div>
+
+        {% endfor %}
+
+    </div>
+
+
+
+    <!-- ================= ABOUT ================= -->
+    <div class="row mb-5">
+
+        <div class="col-md-7">
+
+            <h4 class="fw-bold text-primary mb-3">
+                About GoPass
+            </h4>
+
+            <p class="text-muted mb-3">
+                GoPass is dedicated to transforming event management
+                through secure ticketing, intelligent analytics,
+                and seamless entry control.
+            </p>
+
+            <a href="{{ url_for('about') }}"
+               class="fw-semibold text-primary text-decoration-none">
+                Learn more <i class="bi bi-arrow-right"></i>
+            </a>
+
+        </div>
+
+
+        <div class="col-md-5 text-md-end mt-4 mt-md-0">
+
+            <h6 class="fw-bold mb-3">Connect With Us</h6>
+
+            <div>
+
+                <a href="#" class="text-dark fs-4 me-3"><i class="bi bi-facebook"></i></a>
+                <a href="#" class="text-dark fs-4 me-3"><i class="bi bi-twitter"></i></a>
+                <a href="#" class="text-dark fs-4 me-3"><i class="bi bi-instagram"></i></a>
+                <a href="#" class="text-dark fs-4 me-3"><i class="bi bi-tiktok"></i></a>
+                <a href="#" class="text-dark fs-4"><i class="bi bi-envelope-fill"></i></a>
+
+            </div>
+
         </div>
 
     </div>
+
+
+
 </div>
+
+
+
+<!-- ================= FOOTER ================= -->
+<footer class="bg-dark text-light py-4 rounded-4">
+
+    <div class="container">
+
+        <div class="row">
+
+            <div class="col-md-4 mb-3">
+                <h5 class="fw-bold">GoPass</h5>
+                <p class="small text-muted">
+                    Smart ticketing and event management platform.
+                </p>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <h6 class="fw-bold">Quick Links</h6>
+                <ul class="list-unstyled">
+                    <li><a href="/home" class="text-light text-decoration-none">Home</a></li>
+                    <li><a href="/about" class="text-light text-decoration-none">About</a></li>
+                    <li><a href="/events" class="text-light text-decoration-none">Events</a></li>
+                    <!-- <li><a href="/contact" class="text-light text-decoration-none">Contact</a></li> -->
+                </ul>
+            </div>
+
+            <div class="col-md-4 mb-3">
+                <h6 class="fw-bold">Contact</h6>
+                <p class="small mb-1">Email: info@gopass.com</p>
+                <p class="small mb-0">Phone: +256 XXX XXX XXX</p>
+            </div>
+
+        </div>
+
+        <hr class="border-secondary">
+
+        <div class="text-center small text-muted">
+            © {{ current_year }} GoPass. All rights reserved.
+        </div>
+
+    </div>
+
+</footer>
+
 
 {% endblock %}

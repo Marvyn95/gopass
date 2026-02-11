@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 {% block content %}
-<div class="container">
-    <h2 class="col-md-8 mx-auto" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">Create Event</h2>
+<div class="container mt-5">
+    <h4 class="col-md-8 mx-auto text-primary">Create Event</h4>
     <form method="post" enctype="multipart/form-data" class="row g-3 col-md-8 mx-auto">
         <input type="hidden" name="user_id" value="{{ user._id }}">
         <div class="col-md-12">
@@ -75,7 +75,7 @@
             <button type="button" class="btn btn-outline-primary btn-sm mt-1" id="add-ticket-type">Add Category</button>
         </div>
         <div class="col-12 d-flex justify-content-center">
-            <button type="submit" class="btn btn-success" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); border: none;">Create Event</button>
+            <button type="submit" class="btn btn-success fw-semibold" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); border: none;">Create Event</button>
         </div>
     </form>
     <script>

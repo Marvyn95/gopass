@@ -1,176 +1,166 @@
 {% extends "base.html" %}
 {% block content %}
-<div class="container my-1">
-  <!-- Header Section -->
-  <div class="row mb-2">
-    <div class="col-12">
-      <div class="d-flex align-items-center mb-4">
-        <i class="bi bi-person-circle fs-2 me-3 text-primary"></i>
-        <h2 class="fw-bold mb-0 text-light" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">
-          Profile Information
-        </h2>
-      </div>
-    </div>
-  </div>
 
-  <!-- Main Profile Info Cards -->
-  <div class="row mb-3">
-    <div class="col-md-6 col-lg-3 mb-4">
-      <div class="card bg-light border-0 h-100 shadow">
+<div class="container-xl py-4">
+
+    <!-- Profile Header -->
+    <div class="card border-0 shadow-sm mb-4 mt-5">
         <div class="card-body">
-          <div class="mb-3">
-            <i class="bi bi-person-fill text-primary fs-5"></i>
-          </div>
-          <p class="text-dark small mb-2">Full Name</p>
-          <p class="text-dark fw-bold">{{ user.first_name }} {{ user.last_name }}</p>
+            <div class="d-flex flex-column flex-md-row align-items-center gap-4">
+
+                <!-- Avatar -->
+                <div class="profile-avatar">
+                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center"
+                         style="width:90px;height:90px;font-size:2rem;font-weight:600;">
+                        {{ user.first_name[0] }}{{ user.last_name[0] }}
+                    </div>
+                </div>
+
+                <!-- User Info -->
+                <div class="flex-grow-1 text-center text-md-start">
+                    <h3 class="fw-bold mb-1">{{ user.first_name }} {{ user.last_name }}</h3>
+                    <p class="text-muted mb-1">{{ user.email }}</p>
+                    <span class="badge bg-primary px-3 py-2 rounded-pill">{{ user.role|capitalize }}</span>
+                </div>
+
+                <!-- Actions -->
+                <div class="d-flex gap-2">
+                    <button class="btn btn-outline-primary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#editProfileModal">
+                        <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="btn btn-outline-secondary rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#changePasswordModal">
+                        <i class="bi bi-key"></i>
+                    </button>
+                    {% if user.role == 'admin' %}
+                    <button class="btn btn-outline-success rounded-pill px-3" data-bs-toggle="modal" data-bs-target="#addOrganizationModal">
+                        <i class="bi bi-building"></i>
+                    </button>
+                    {% endif %}
+                </div>
+
+            </div>
         </div>
-      </div>
     </div>
 
-    <div class="col-md-6 col-lg-3 mb-4">
-      <div class="card bg-light border-0 h-100 shadow">
+    <!-- Stats Cards -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Full Name</small>
+                    <h6 class="fw-semibold mt-1">{{ user.first_name }} {{ user.last_name }}</h6>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Email</small>
+                    <h6 class="fw-semibold mt-1 text-break">{{ user.email }}</h6>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Contact</small>
+                    <h6 class="fw-semibold mt-1">{{ user.contact }}</h6>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <small class="text-muted">Organization</small>
+                    <h6 class="fw-semibold mt-1">{{ org.name }}</h6>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Management Section -->
+    {% if user and user.role in ['admin','manager'] %}
+    <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-0">
+            <h5 class="fw-bold mb-0">Management Tools</h5>
+        </div>
         <div class="card-body">
-          <div class="mb-3">
-            <i class="bi bi-envelope-fill text-primary fs-5"></i>
-          </div>
-          <p class="text-dark small mb-2">Email Address</p>
-          <p class="text-dark fw-bold text-break">{{ user.email }}</p>
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <a href="{{ url_for('manage_users') }}" class="card h-100 border-0 shadow-sm text-decoration-none hover-card">
+                        <div class="card-body d-flex gap-3 align-items-center">
+                            <i class="bi bi-people fs-3 text-primary"></i>
+                            <div>
+                                <h6 class="fw-semibold mb-0">Users</h6>
+                                <small class="text-muted">Manage accounts</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{{ url_for('create_event') }}" class="card h-100 border-0 shadow-sm text-decoration-none hover-card">
+                        <div class="card-body d-flex gap-3 align-items-center">
+                            <i class="bi bi-calendar-plus fs-3 text-primary"></i>
+                            <div>
+                                <h6 class="fw-semibold mb-0">Create Event</h6>
+                                <small class="text-muted">Publish events</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                <div class="col-md-4">
+                    <a href="{{ url_for('manage_events') }}" class="card h-100 border-0 shadow-sm text-decoration-none hover-card">
+                        <div class="card-body d-flex gap-3 align-items-center">
+                            <i class="bi bi-calendar-check fs-3 text-primary"></i>
+                            <div>
+                                <h6 class="fw-semibold mb-0">Events</h6>
+                                <small class="text-muted">Manage listings</small>
+                            </div>
+                        </div>
+                    </a>
+                </div>
+                
+            </div>
         </div>
-      </div>
     </div>
+    {% endif %}
 
-    <div class="col-md-6 col-lg-3 mb-4">
-      <div class="card bg-light border-0 h-100 shadow">
-        <div class="card-body">
-          <div class="mb-3">
-            <i class="bi bi-telephone-fill text-primary fs-5"></i>
-          </div>
-          <p class="text-dark small mb-2">Contact Number</p>
-          <p class="text-dark fw-bold">{{ user.contact }}</p>
-        </div>
-      </div>
-    </div>
-
-    <div class="col-md-6 col-lg-3 mb-4">
-      <div class="card bg-light border-0 h-100 shadow">
-        <div class="card-body">
-          <div class="mb-3">
-            <i class="bi bi-geo-alt-fill text-primary fs-5"></i>
-          </div>
-          <p class="text-dark small mb-2">Role</p>
-          <p class="text-dark fw-bold">{{ user.role }}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Organization Info -->
-  <div class="row mb-5">
-    <div class="col-lg-8">
-      <div class="card bg-light border-0 shadow">
-        <div class="card-body">
-          <div class="d-flex align-items-center mb-4">
-            <i class="bi bi-building text-primary fs-4 me-2"></i>
-            <h5 class="fw-normal mb-0 text-dark">Organization</h5>
-          </div>
-          <p class="text-dark mb-0 fw-bold fs-3">{{ org.name }}</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Quick Actions (Right Side) -->
-    <div class="col-lg-4 mt-3">
-      <div class="d-flex flex-column gap-2">
-        <button type="button" class="btn btn-outline-primary btn-sm w-50" data-bs-toggle="modal" data-bs-target="#editProfileModal" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">
-          <i class="bi bi-pencil-square me-2"></i> Edit Profile
-        </button>
-        <button type="button" class="btn btn-outline-primary btn-sm w-50" data-bs-toggle="modal" data-bs-target="#changePasswordModal" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">
-          <i class="bi bi-key me-2"></i> Change Password
-        </button>
-        {% if user and user.role == 'admin' %}
-        <button type="button" class="btn btn-outline-primary btn-sm w-100" data-bs-toggle="modal" data-bs-target="#addOrganizationModal" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">
-          <i class="bi bi-building-add me-2"></i> Add Organization
-        </button>
-        {% endif %}
-      </div>
-    </div>
-  </div>
-
-  <!-- Admin Section -->
-  {% if user and user.role in ['admin', 'manager'] %}
-  <div class="row mb-5">
-    <div class="col-12">
-      <h5 class="fw-bold mb-3" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">Management</h5>
-    </div>
-    <div class="col-md-6 col-lg-4 mb-4">
-      <a href="{{ url_for('manage_users') }}" class="btn btn-white border border-primary w-100 text-start py-3 shadow">
-        <i class="bi bi-people text-primary me-3"></i>
-        <span class="text-dark">Manage Users</span>
-      </a>
-    </div>
-    <div class="col-md-6 col-lg-4 mb-4">
-      <a href="{{ url_for('create_event') }}" class="btn btn-white border border-primary w-100 text-start py-3 shadow">
-        <i class="bi bi-calendar-plus text-primary me-3"></i>
-        <span class="text-dark">Create Event</span>
-      </a>
-    </div>
-    <div class="col-md-6 col-lg-4 mb-4">
-      <a href="{{ url_for('manage_events') }}" class="btn btn-white border border-primary w-100 text-start py-3 shadow">
-        <i class="bi bi-calendar-check text-primary me-3"></i>
-        <span class="text-dark">Manage Events</span>
-      </a>
-    </div>
-  </div>
-  {% endif %}
 </div>
 
-<!-- Modals -->
-<!-- Add Organization Modal -->
-<div class="modal fade" id="addOrganizationModal" tabindex="-1" aria-labelledby="addOrganizationModalLabel" aria-hidden="true">
+<!-- Small Hover Effect -->
+<style>
+.hover-card {
+    transition: all 0.2s ease;
+}
+.hover-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+}
+</style>
+
+<!-- MODALS -->
+
+<!-- Edit Profile Modal -->
+<div class="modal fade" id="editProfileModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content bg-white text-dark border-0 shadow">
-      <form method="POST" action="{{ url_for('add_organization') }}">
+    <div class="modal-content shadow border-0 bg-white">
+      <form method="POST" action="{{ url_for('edit_profile') }}">
         <div class="modal-header border-0">
-          <h5 class="modal-title text-dark" id="addOrganizationModalLabel">Add Organization Details</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h5 class="modal-title">Edit Profile</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <h6 class="mb-3 text-dark">Organization Details</h6>
-          <div class="mb-3">
-            <input type="text" class="form-control" name="org_name" placeholder="Organization/Business Name" required>
-          </div>
-          <div class="mb-3">
-            <input type="text" class="form-control" name="org_address" placeholder="Address" required>
-          </div>
-          <div class="mb-3">
-            <input type="text" class="form-control" name="org_tin" placeholder="TIN Number" required>
-          </div>
-          <hr>
-          <h6 class="mb-3 text-dark">Manager Details</h6>
+          <input type="hidden" name="user_id" value="{{ user._id }}">
           <div class="row">
-            <div class="col-md-6 mb-3">
-              <input type="text" class="form-control" name="manager_first_name" placeholder="First Name" required>
-            </div>
-            <div class="col-md-6 mb-3">
-              <input type="text" class="form-control" name="manager_last_name" placeholder="Last Name" required>
-            </div>
+            <div class="col mb-2"><input class="form-control" type="text" name="first_name" value="{{ user.first_name }}" required></div>
+            <div class="col mb-2"><input class="form-control" type="text" name="last_name" value="{{ user.last_name }}" required></div>
           </div>
-          <div class="mb-3">
-            <input type="email" class="form-control" name="manager_email" placeholder="Email" required>
-          </div>
-          <div class="mb-3">
-            <input type="text" class="form-control" name="manager_contact" placeholder="Contact" required>
-          </div>
-          <div class="mb-3">
-            <input type="password" class="form-control" name="password" placeholder="Password" required>
-          </div>
-          <div class="mb-3">
-            <input type="password" class="form-control" name="confirm_password" placeholder="Confirm Password" required>
-          </div>
+          <input class="form-control mb-2" type="email" name="email" value="{{ user.email }}" required>
+          <input class="form-control mb-2" type="text" name="contact" value="{{ user.contact }}">
         </div>
         <div class="modal-footer border-0">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Add Organization</button>
+          <button type="submit" class="btn btn-primary">Save</button>
         </div>
       </form>
     </div>
@@ -178,75 +168,59 @@
 </div>
 
 <!-- Change Password Modal -->
-<div class="modal fade" id="changePasswordModal" tabindex="-1" aria-labelledby="changePasswordModalLabel" aria-hidden="true">
+<div class="modal fade" id="changePasswordModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content bg-white text-dark border-0 shadow">
+    <div class="modal-content shadow border-0 bg-white">
       <form method="POST" action="{{ url_for('change_password') }}">
         <div class="modal-header border-0">
-          <h5 class="modal-title text-dark" id="changePasswordModalLabel">Change Password</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h5 class="modal-title">Change Password</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
           <input type="hidden" name="user_id" value="{{ user.id }}">
-          <div class="mb-3">
-            <label class="form-label text-dark small">Current Password</label>
-            <input type="password" class="form-control" name="current_password" placeholder="Enter current password" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label text-dark small">New Password</label>
-            <input type="password" class="form-control" name="new_password" placeholder="Enter new password" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label text-dark small">Confirm Password</label>
-            <input type="password" class="form-control" name="confirm_password" placeholder="Confirm new password" required>
-          </div>
+          <input class="form-control mb-2" type="password" name="current_password" placeholder="Current Password" required>
+          <input class="form-control mb-2" type="password" name="new_password" placeholder="New Password" required>
+          <input class="form-control mb-2" type="password" name="confirm_password" placeholder="Confirm Password" required>
         </div>
         <div class="modal-footer border-0">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Update Password</button>
+          <button type="submit" class="btn btn-primary">Update</button>
         </div>
       </form>
     </div>
   </div>
 </div>
 
-<!-- Edit Profile Modal -->
-<div class="modal fade" id="editProfileModal" tabindex="-1" aria-labelledby="editProfileModalLabel" aria-hidden="true">
+<!-- Add Organization Modal (Admin Only) -->
+{% if user.role == 'admin' %}
+<div class="modal fade" id="addOrganizationModal" tabindex="-1">
   <div class="modal-dialog modal-dialog-centered">
-    <div class="modal-content bg-white text-dark border-0 shadow">
-      <form method="POST" action="{{ url_for('edit_profile') }}">
+    <div class="modal-content shadow border-0 bg-white">
+      <form method="POST" action="{{ url_for('add_organization') }}">
         <div class="modal-header border-0">
-          <h5 class="modal-title text-dark" id="editProfileModalLabel">Edit Profile</h5>
-          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+          <h5 class="modal-title">Add Organization</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
         </div>
         <div class="modal-body">
-          <input type="hidden" name="user_id" value="{{ user._id }}">
-          <div class="row">
-            <div class="col-md-6 mb-3">
-              <label class="form-label text-dark small">First Name</label>
-              <input type="text" class="form-control" name="first_name" value="{{ user.first_name }}" required>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label class="form-label text-dark small">Last Name</label>
-              <input type="text" class="form-control" name="last_name" value="{{ user.last_name }}" required>
-            </div>
-          </div>
-          <div class="mb-3">
-            <label class="form-label text-dark small">Email</label>
-            <input type="email" class="form-control" name="email" value="{{ user.email }}" required>
-          </div>
-          <div class="mb-3">
-            <label class="form-label text-dark small">Contact</label>
-            <input type="text" class="form-control" name="contact" value="{{ user.contact }}">
-          </div>
+          <input class="form-control mb-2" type="text" name="org_name" placeholder="Organization Name" required>
+          <input class="form-control mb-2" type="text" name="org_address" placeholder="Address" required>
+          <input class="form-control mb-2" type="text" name="org_tin" placeholder="TIN Number" required>
+          <hr>
+          <input class="form-control mb-2" type="text" name="manager_first_name" placeholder="Manager First Name" required>
+          <input class="form-control mb-2" type="text" name="manager_last_name" placeholder="Manager Last Name" required>
+          <input class="form-control mb-2" type="email" name="manager_email" placeholder="Manager Email" required>
+          <input class="form-control mb-2" type="text" name="manager_contact" placeholder="Manager Contact" required>
+          <input class="form-control mb-2" type="password" name="password" placeholder="Password" required>
+          <input class="form-control mb-2" type="password" name="confirm_password" placeholder="Confirm Password" required>
         </div>
         <div class="modal-footer border-0">
           <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-          <button type="submit" class="btn btn-primary">Save Changes</button>
+          <button type="submit" class="btn btn-primary">Add</button>
         </div>
       </form>
     </div>
   </div>
 </div>
+{% endif %}
 
 {% endblock %}
