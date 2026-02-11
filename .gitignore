@@ -1,0 +1,4 @@
+event_images/
+venv/
+__pycache__/
+*.pyc
