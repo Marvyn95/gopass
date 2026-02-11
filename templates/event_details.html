@@ -148,7 +148,7 @@
 
         <aside>
           <!-- Edit/Delete Buttons -->
-          {% if user and user.role in ['admin', 'manager'] and user.organization_id|string == event.organization_id|string %}
+          {% if user and user.role in ['manager'] and user.organization_id|string == event.organization_id|string or user and user.role == 'admin' %}
           <div class="mt-4 d-flex gap-2">
             <!-- Edit Event Modal Trigger -->
             <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editEventModal{{ event._id }}">

@@ -48,7 +48,10 @@ def profile():
     user = db.users.find_one({'_id': ObjectId(user_id)})
     org = db.organizations.find_one({'_id': ObjectId(user.get('organization_id'))}) if 'organization_id' in user else None
     
-    running_events = db.events.find({'organization_id': ObjectId(user.get('organization_id'))}) if 'organization_id' in user else []
+    if user.get('role') == 'admin':
+        running_events = list(db.events.find().sort('date'))
+    else:
+        running_events = list(db.events.find({'organization_id': ObjectId(user.get('organization_id'))})) if 'organization_id' in user else []
 
     return render_template('profile.html', user=user, org=org, running_events=running_events)
 
@@ -111,7 +114,15 @@ def edit_profile():
 @app.route('/manage_users')
 def manage_users():
     user = db.users.find_one({'_id': ObjectId(session['user_id'])}) if 'user_id' in session else None
-    users = list(db.users.find({'organization_id': user.get('organization_id')})) if user and 'organization_id' in user else []
+
+    if user.get('role') == 'admin':
+        users = list(db.users.find())
+        organizations = list(db.organizations.find())
+        for u in users:
+            u['organization_name'] = next((org['name'] for org in organizations if str(org['_id']) == str(u.get('organization_id'))), 'N/A') if u.get('organization_id') else 'N/A'
+        users = sorted(users, key=lambda x: x.get('first_name', '').lower())
+    else:
+        users = list(db.users.find({'organization_id': user.get('organization_id')})) if user and 'organization_id' in user else []
     return render_template('manage_users.html', users=users, user=user)
 
 
@@ -457,7 +468,13 @@ def buy_tickets():
 @app.route('/manage_events')
 def manage_events():
     user = db.users.find_one({'_id': ObjectId(session['user_id'])}) if 'user_id' in session else None
-    events = list(db.events.find({'organization_id': ObjectId(user.get('organization_id'))})) if user and 'organization_id' in user else []
+    if user.get('role') == 'admin':
+        events = list(db.events.find().sort('date'))
+        organizations = list(db.organizations.find())
+        for event in events:
+            event['organization_name'] = next((org['name'] for org in organizations if str(org['_id']) == str(event.get('organization_id'))), 'N/A') if event.get('organization_id') else 'N/A'
+    else:
+        events = list(db.events.find({'organization_id': ObjectId(user.get('organization_id'))}).sort('date')) if user and 'organization_id' in user else []
     return render_template('manage_events.html', events=events, user=user)
 
 
@@ -757,5 +774,65 @@ def validate_qr():
             flash(f'Ticket is valid for {event_details.get("title") if event_details else "Unknown Event"}.', 'success')
         except Exception as e:
             flash('Error processing QR Code. Please try again.', 'danger')
+
+    return redirect(request.referrer)
+
+
+@app.route('/manage_organizations')
+def manage_organizations():
+    user = db.users.find_one({'_id': ObjectId(session['user_id'])}) if 'user_id' in session else None
+    organizations = list(db.organizations.find())
+    return render_template('manage_organizations.html', organizations=organizations, user=user)
+
+@app.route('/edit_organization', methods=['POST'])
+def edit_organization():
+    if request.method == 'POST':
+        organization_id = request.form['organization_id']
+        name = request.form['name'].strip()
+        address = request.form['address'].strip()
+        tin = request.form['tin'].strip()
+
+        existing_org = db.organizations.find_one({'name': name})
+
+        if existing_org and str(existing_org['_id']) != organization_id:
+            flash('Organization name already exists. Please use a different name.', 'danger')
+            return redirect(request.referrer)
+        
+        existing_org = db.organizations.find_one({'tin': tin})
+
+        if existing_org and str(existing_org['_id']) != organization_id:
+            flash('Organization TIN already exists. Please use your unique URA assigned TIN.', 'danger')
+            return redirect(request.referrer)
+
+        db.organizations.update_one(
+            {'_id': ObjectId(organization_id)},
+            {'$set': {
+                'name': name,
+                'address': address,
+                'tin': tin
+            }}
+        )
+        flash('Organization updated successfully!', 'success')
+
+    return redirect(request.referrer)
+
+
+@app.route('/delete_organization', methods=['POST'])
+def delete_organization():
+    if request.method == 'POST':
+        organization_id = request.form['organization_id']
+
+        users = list(db.users.find({'organization_id': ObjectId(organization_id)}))
+        if len(users) > 0:
+            flash('Cannot delete organization with existing users.', 'danger')
+            return redirect(request.referrer)
+        
+        events = list(db.events.find({'organization_id': ObjectId(organization_id)}))
+        if len(events) > 0:
+            flash('Cannot delete organization with existing events.', 'danger')
+            return redirect(request.referrer)
+        
+        db.organizations.delete_one({'_id': ObjectId(organization_id)})
+        flash('Organization deleted successfully!', 'success')
 
     return redirect(request.referrer)
