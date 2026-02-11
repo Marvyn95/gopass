@@ -7,25 +7,47 @@
   <div class="row justify-content-center">
     <div class="event-card col-md-8" role="region" aria-label="Event details">
 
-      <div class="event-header">
+      <div class="event-header mt-2">
         <div class="d-flex flex-wrap flex-column">
           <h3 class="title text-primary">
             {{ event.title }}
           </h3>
 
-          <div class="text-dark d-flex flex-column">
-            <p class="mt-0">📅 {{ event.date.strftime('%d %b %Y') }}</p>
-            <p class="mt-0">
-              ⏰ {{ event.start_time.strftime('%I:%M %p') }}
-              {% if event.end_time %} — {{ event.end_time.strftime('%I:%M %p') }}{% endif %}
-            </p>
-            <p class="mt-0">📍 {{ event.location }}</p>
-          </div>
+            <div class="row">
+              <div class="col-md-6">
+              <div class="d-flex justify-content-between align-items-start flex-wrap">
+                <div class="text-dark">
+                <p class="mb-1"><i class="bi bi-calendar-event text-primary"></i> {{ event.date.strftime('%d %b %Y') }}</p>
+                <p class="mb-1"><i class="bi bi-clock text-primary"></i> {{ event.start_time.strftime('%I:%M %p') }}{% if event.end_time %} — {{ event.end_time.strftime('%I:%M %p') }}{% endif %}</p>
+                <p class="mb-1"><i class="bi bi-geo-alt text-primary"></i> {{ event.location }}, <span class="text-primary"> {{ event.venue }}</span> </p>
+                </div>
+              </div>
+              </div>
 
-          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
-            <div class="venue-info text-dark">
-              <i class="bi bi-geo-alt"> Venue: {{ event.venue }}</i>
+              <div class="col-md-6 d-flex justify-content-start align-items-start flex-column">
+                <p class="label text-primary fw-semibold fs-6 mb-2"><i class="bi bi-book text-primary"></i> Bookings</p>
+                <div class="d-flex flex-wrap">
+                  {% if bookings_by_category == {} %}
+                    {% if event.ticket_categories.values() | map('int', default=0) | sum == 0 %}
+                      <span class="text-dark">Free Event</span>
+                    {% else %}
+                      <span class="text-dark">No bookings yet. Be the first to book!</span>
+                    {% endif %}
+                  {% else %}
+                    {% for cat in bookings_by_category.keys() %}
+                    <span class="text-dark">{{ cat|title }}: <span class="text-primary">{{ bookings_by_category[cat] }}</span></span>{% if not loop.last %}, {% endif %}
+                    {% endfor %}
+                  {% endif %}
+                </div>
+              </div>
+
             </div>
+            
+
+          <div class="d-flex justify-content-between align-items-center flex-wrap">
+            <!-- <div class="venue-info text-dark">
+              <i class="bi bi-geo-alt text-primary"> Venue: {{ event.venue }}</i>
+            </div> -->
             
             {% if user == None and free_entry == False or user != None and user.organization_id|string != event.organization_id|string and free_entry == False %}
             <button class="btn btn-success"
@@ -82,27 +104,28 @@
         </div>
 
         <!-- Image + Details -->
-        <div class="d-flex flex-wrap gap-4 align-items-start mt-3">
+        <div class="row mt-3 align-items-start">
           {% if event.image %}
-          <div class="flex-shrink-0">
+          <div class="col-lg-5 col-md-6 mb-3 mb-md-0">
             <img src="{{ url_for('static', filename='event_images/' + event.image) }}"
-                 alt="{{ event.title }}"
-                 style="max-width:100%; width:350px; border-radius:8px;">
+           alt="{{ event.title }}"
+           class="img-fluid rounded"
+           style="max-width:100%; width:350px;">
           </div>
           {% endif %}
 
-          <div class="flex-fill" style="min-width:250px">
-            <div class="label text-dark" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">Details</div>
+          <div class="col-lg-7 col-md-6">
+            <div class="label text-primary fw-semibold">Details</div>
             <div class="card-panel">
               {% if event.description %}
-                <div class="text-dark">{{ event.description }}</div>
+          <div class="text-dark">{{ event.description }}</div>
               {% else %}
-                <em class="small-muted text-dark">No description provided.</em>
+          <em class="small-muted text-dark">No description provided.</em>
               {% endif %}
 
-              <div class="d-flex gap-2 flex-wrap mt-3">
-                <div class="chip text-dark">🎵 Event type: {{ event.category }}</div>
-                <div class="chip text-dark">🎫 Tickets Available</div>
+              <div class="d-flex gap-2 flex-wrap mt-1">
+          <div class="chip text-dark">🎵 Event type: {{ event.category }}</div>
+          <div class="chip text-dark">🎫 Tickets Available</div>
               </div>
             </div>
           </div>
@@ -110,9 +133,9 @@
       </div>
 
       <!-- Ticket Prices -->
-      <div class="grid mb-2">
+      <div class="grid mb-1">
         <div class="left">
-          <div class="label text-dark mt-4 fs-5 fw-semibold" style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">Ticket Prices</div>
+          <div class="label text-primary mt-4 fw-semibold">Ticket Prices</div>
           <div class="card-panel">
             {% for category, price in event.ticket_categories.items() %}
               <div class="d-flex justify-content-between py-2 border-bottom border-secondary">

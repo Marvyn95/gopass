@@ -337,13 +337,19 @@ def delete_event():
     if request.method == 'POST':
         event_id = request.form['event_id']
         event = db.events.find_one({'_id': ObjectId(event_id)})
+
+        bookings = list(db.bookings.find({'event_id': ObjectId(event_id)}))
+        if len(bookings) > 0:
+            flash('Cannot delete event with existing bookings.', 'danger')
+            return redirect(request.referrer)
+        
         if event and 'image' in event:
             delete_image(event.get('image'))
         
         db.events.delete_one({'_id': ObjectId(event_id)})
         flash('Event deleted successfully!', 'success')
         
-    return redirect(url_for('profile'))
+    return redirect(request.referrer)
 
 
 @app.route('/edit_event', methods=['POST'])
@@ -420,7 +426,18 @@ def event_details(event_id):
         if price != '0':
             free_entry = False
             break
-    return render_template('event_details.html', event=event, user=user, free_entry=free_entry)
+
+    event_bookings = list(db.bookings.find({'event_id': ObjectId(event_id)}))
+
+    bookings_by_category = {}
+    for booking in event_bookings:
+        category = booking.get('ticket_category', 'Unknown')
+        if category not in bookings_by_category:
+            bookings_by_category[category] = int(booking.get('quantity', 1))
+        else:
+            bookings_by_category[category] += int(booking.get('quantity', 1))
+
+    return render_template('event_details.html', event=event, user=user, free_entry=free_entry, bookings_by_category=bookings_by_category)
 
 
 @app.route('/buy_tickets', methods=['GET','POST'])
