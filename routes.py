@@ -836,3 +836,12 @@ def delete_organization():
         flash('Organization deleted successfully!', 'success')
 
     return redirect(request.referrer)
+
+
+@app.route('/search_event', methods=['POST'])
+def search_event():
+    if request.method == 'POST':
+        query = request.form['query'].strip()
+        print("query: ", query)
+
+        return redirect(url_for('search_event', query=query))
