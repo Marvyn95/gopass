@@ -29,7 +29,40 @@ def home():
 @app.route('/signup', methods=['GET', 'POST'])
 def signup():
     if request.method == 'POST':
-        pass
+        first_name = request.form['first_name'].strip()
+        last_name = request.form['last_name'].strip()
+        email = request.form['email'].strip()
+        contact = request.form['contact'].strip()
+        password = request.form['password'].strip()
+        confirm_password = request.form['confirm_password'].strip()
+        admin_password = request.form['admin_password'].strip()
+
+        if db.users.find_one({'email': email}):
+            flash('Email already exists. Please use a different email.', 'danger')
+            return redirect(url_for('signup'))
+        
+        if password != confirm_password:
+            flash('Passwords do not match. Please try again.', 'danger')
+            return redirect(url_for('signup'))
+        
+        with open('../config.json') as config_file:
+            config = json.load(config_file)
+        
+        if admin_password != config.get('admin_password'):
+            flash('Invalid admin password. Please try again.', 'danger')
+            return redirect(url_for('signup'))
+        
+        db.users.insert_one({
+            'first_name': first_name,
+            'last_name': last_name,
+            'email': email,
+            'contact': contact,
+            'password': bcrypt.generate_password_hash(password).decode('utf-8'),
+            'role': 'admin'
+        })
+        flash('Account created successfully!', 'success')
+        return redirect(url_for('login'))
+
     return render_template('signup.html')
 
 
