@@ -1,4 +1,6 @@
 event_images/
 venv/
+static/uploads/*
+static/event_images/*
 __pycache__/
 *.pyc
