@@ -13,7 +13,7 @@
                             </a>
                             <div class="d-flex align-items-center bg-white rounded-pill px-2 py-1">
                                 <form class="d-flex align-items-center gap-2" method="POST" action="{{ url_for('search_event') }}">
-                                    <input type="text" class="form-control form-control-sm" name="query" placeholder="Search events..." aria-label="Search events">
+                                    <input type="text" class="form-control form-control-sm" name="query" placeholder="Search events..." value="{{ query }}" aria-label="Search events">
                                     <button class="btn btn-link py-1 text-secondary" type="submit" aria-label="Search">
                                         <i class="bi bi-search fs-5 text-primary" aria-hidden="true"></i>
                                     </button>
@@ -114,7 +114,7 @@
                                                 align-items: center;
                                                 justify-content: center;
                                                 font-family: 'Segoe UI', Arial, sans-serif;
-                                                background: none;
+                                                background: rgba(255, 255, 255, 0.9);
                                             ">
                                                 <span style="background: linear-gradient(90deg, #8ec5ff, #3b82f6, #ec4899); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-fill-color: transparent;">
                                                     <div style="font-size: 1.3rem; font-weight: 700; line-height: 1;">{{ event.date.strftime("%d") }}</div>
@@ -177,4 +177,4 @@
         </div>
     </div>
 
-{% endblock %}    
+    {% endblock %}    

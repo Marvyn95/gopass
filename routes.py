@@ -2,7 +2,7 @@ from __init__ import app, db, bcrypt
 from flask import request, jsonify, render_template, redirect, url_for, session, flash, send_file
 from bson.objectid import ObjectId
 from datetime import datetime
-from utils import save_image, delete_image
+from utils import save_image, delete_image, generate_pesapal_access_token, pesa_pal_submit_order_request
 import qrcode
 import json
 from io import BytesIO
@@ -17,10 +17,9 @@ def events():
     user = db.users.find_one({'_id': ObjectId(session['user_id'])}) if 'user_id' in session else None
     events = list(db.events.find().sort('date'))
     now = datetime.now()
-    
     today_events = [event for event in events if event.get('date').date() == now.date()]
-
     return render_template('events.html', events=events, user=user, today_events=today_events)
+
 
 @app.route('/home')
 def home():
@@ -478,8 +477,8 @@ def manage_events():
     return render_template('manage_events.html', events=events, user=user)
 
 
-@app.route('/airtel_payment_process', methods=['POST'])
-def airtel_payment_process():
+@app.route('/pesapal_payment_process', methods=['POST'])
+def pesapal_payment_process():
     if request.method == 'POST':
         event_id = request.form['event_id']
         quantity = request.form['quantity']
@@ -498,142 +497,45 @@ def airtel_payment_process():
 
         event = db.events.find_one({'_id': ObjectId(event_id)})
 
-        # logic for mobile money api integration goes here
-        transaction_id = secrets.token_hex(8)
-
-        ticket_io_strs = []
-        for i in range(int(quantity)):
-            booking_id = db.bookings.insert_one({
-                'event_id': ObjectId(event_id),
-                'organization_id': ObjectId(event.get('organization_id')),
-                'ticket_category': ticket_category,
-                'ticket_price': ticket_price,
-                'quantity': int(quantity),
-                'total_price': float(total_price),
-                'payment_method': payment_method,
-                'phone_number': phone_number,
-                'status': 'paid',
-                'booking_date': datetime.now(),
-                'transaction_id': transaction_id
-            }).inserted_id
-
-            qrcode_details = {
-                'event_id': event_id,
-                'event_title': event_title,
-                'event_category': event_category,
-                'event_date': event_date,
-                'start_time': event_start_time,
-                'end_time': event_end_time,
-                'event_location': event_location,
-                'event_venue': event_venue,
-                'ticket_category': ticket_category,
-                'ticket_price': ticket_price,
-                'phone_number': phone_number,
-                'booking_id': str(booking_id),
-                'transaction_id': transaction_id
-            }
-
-            qr = qrcode.QRCode(version=1, box_size=10, border=5)
-            qr.add_data(json.dumps(qrcode_details))
-            qr.make(fit=True)
-
-            img = qr.make_image(fill_color="black", back_color="white")
-            img_io = BytesIO()
-            img.save(img_io, 'PNG')
-            img_io.seek(0)
-            qr_code = base64.b64encode(img_io.getvalue()).decode()
-
-            db.bookings.update_one(
-                {'_id': booking_id},
-                {'$set': {'qr_code': qr_code}}
-            )
-
-            # Creating ticket
-            ticket_width, ticket_height = 600, 200
-            ticket = Image.new('RGB', (ticket_width, ticket_height), color='#f0f0f0')
-            draw = ImageDraw.Draw(ticket)
-
-            # Load event image
-            event_image = Image.open(f"static/event_images/{event.get('image')}")
-            event_image = event_image.resize((ticket_width, ticket_height))
-            event_image.putalpha(int(255 * 0.2))  # Set opacity to 20%
-            ticket.paste(event_image, (0, 0), event_image)
-
-            # Add gradient-like border
-            # draw.rectangle([10, 10, ticket_width-10, ticket_height-10], outline="#000000", width=3)
-
-            # Add event title in header
-            try:
-                title_font = ImageFont.truetype("arial.ttf", 20)
-                detail_font = ImageFont.truetype("DejaVuSans.ttf", 16)  # Changed to a sans-serif font
-            except:
-                title_font = ImageFont.load_default()
-                detail_font = ImageFont.load_default()
-
-            draw.text((30, 25), f"{event_title}", fill="#cb2247", font=title_font, weight="bold")
-
-            # Add event details text on the left side
-            y_offset = 60
-            line_height = 25
-            details = [
-                f"{event_date}  |  {event_start_time} - {event_end_time}",
-                f"{event_location}  |  {event_venue}",
-                f"Ticket : {ticket_category}  |  Qty : {quantity}",
-                f"Price : {ticket_price} UGX",
-                f"Booking ID : {str(booking_id)}"
-            ]
+        # logic for pesapal api integration goes here
+        token = generate_pesapal_access_token()
+        if token is None:
+            flash('Error generating access token for payment. Please try again later.', 'danger')
+            return redirect(request.referrer)
         
-            for detail in details:
-                draw.text((30, y_offset), detail, fill='#2c3e50', font=detail_font)
-                y_offset += line_height
+        order_details = {
+            "id": f"{secrets.token_hex(16)}",
+            "currency": "UGX",
+            "amount": float(total_price),
+            "description": f"Payment for {quantity} tickets to {event_title}",
+            "redirect_mode": "#",
+            "callback_url": "#",
+            "cancellation_url": "#",
+            "notification_id": "",
+            "branch": "MAIN_BRANCH",
+            "billing_address": {
+                "phone_number": phone_number,
+                "email_address": "",
+                "country_code": "UG",
+                "first_name": "",
+                "middle_name": "",
+                "last_name": "",
+                "line_1": "",
+                "line_2": "",
+                "city": "",
+                "state": "",
+                "postal_code": "",
+                "zip_code": ""
+                }
+            }
+        
+        order_response = pesa_pal_submit_order_request(token, order_details)
+        if order_response.get('status') != '200':
+            flash('Error submitting order request for payment. Please try again later.', 'danger')
+            return redirect(request.referrer)
+        elif order_response.get('status') == '200':
+            print("lets_go")
 
-            # Add vertical line in the middle
-            mid_x = ticket_width // 2
-            draw.line([(mid_x, 15), (mid_x, ticket_height - 15)], fill="#000000", width=2)
-
-            # Add QR code to the right side
-            qr_img = Image.open(BytesIO(base64.b64decode(qr_code)))
-            qr_img = qr_img.resize((150, 150))
-            ticket.paste(qr_img, (390, 25))
-
-            # Save ticket
-            ticket_io = BytesIO()
-            ticket.save(ticket_io, 'PNG')
-            ticket_io.seek(0)
-
-            db.bookings.update_one(
-                {'_id': booking_id},
-                {'$set': {'ticket': base64.b64encode(ticket_io.getvalue()).decode()}}
-            )
-
-            ticket_io_str = base64.b64encode(ticket_io.getvalue()).decode()
-            ticket_io_strs.append({'ticket_io_str': ticket_io_str, 'ticket_id': str(booking_id), 'event_title': event_title})
-                
-        flash('Payment Processed Successfully', 'success')
-        return render_template('ticket.html', event=event, ticket_io_strs=ticket_io_strs)
-    
-
-@app.route('/mtn_payment_process', methods=['POST'])
-def mtn_payment_process():
-    if request.method == 'POST':
-        event_id = request.form['event_id']
-        quantity = request.form['quantity']
-        ticket_category = request.form['ticket_category']
-        ticket_price = request.form['ticket_price']
-        total_price = request.form['total_price']
-        event_title = request.form['event_title']
-        event_category = request.form['event_category']
-        event_date = request.form['event_date']
-        event_start_time = request.form['event_start_time']
-        event_end_time = request.form['event_end_time']
-        event_location = request.form['event_location']
-        event_venue = request.form['event_venue']
-        payment_method = request.form['payment_method']
-        phone_number = request.form['phone_number'].strip()
-
-        event = db.events.find_one({'_id': ObjectId(event_id)})
-
-        # logic for mobile money api integration goes here
         transaction_id = secrets.token_hex(8)
 
         ticket_io_strs = []
@@ -842,6 +744,19 @@ def delete_organization():
 def search_event():
     if request.method == 'POST':
         query = request.form['query'].strip()
-        print("query: ", query)
+        session['event_search_query'] = query
+        return redirect(url_for('event_search'))
+    
 
-        return redirect(url_for('search_event', query=query))
+@app.route('/event_search')
+def event_search():
+    user = db.users.find_one({'_id': ObjectId(session['user_id'])}) if 'user_id' in session else None
+    query = session.pop('event_search_query', '')
+    events = list(db.events.find({'$or': [{'title': {'$regex': query, '$options': 'i'}},
+                                          {'location': {'$regex': query, '$options': 'i'}},
+                                          {'venue': {'$regex': query, '$options': 'i'}},
+                                          {'category': {'$regex': query, '$options': 'i'}},
+                                          {'description': {'$regex': query, '$options': 'i'}}]}).sort('date')) if query else []
+    now = datetime.now()
+    today_events = [event for event in events if event.get('date').date() == now.date()]
+    return render_template('events.html', events=events, today_events=today_events, user=user, query=query)
