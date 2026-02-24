@@ -4,6 +4,17 @@
     <h4 class="col-md-8 mx-auto text-primary">Create Event</h4>
     <form method="post" enctype="multipart/form-data" class="row g-3 col-md-8 mx-auto">
         <input type="hidden" name="user_id" value="{{ user._id }}">
+        {% if user.role == 'admin' %}
+        <div class="col-md-12">
+            <label for="organization" class="form-label" style="color: #000;">Organization</label>
+            <select id="organization" class="form-select border-dark" name="organization_id" required>
+                <option value="" disabled selected>Select organization</option>
+                {% for org in organizations %}
+                <option value="{{ org._id }}">{{ org.name }}</option>
+                {% endfor %}
+            </select>
+        </div>
+        {% endif %}
         <div class="col-md-12">
             <label for="title" class="form-label" style="color: #000;">Title</label>
             <input type="text" class="form-control border-dark" id="title" name="title" required>

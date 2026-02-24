@@ -82,10 +82,12 @@ def profile():
     
     if user.get('role') == 'admin':
         running_events = list(db.events.find().sort('date'))
+        organizations = list(db.organizations.find())
     else:
         running_events = list(db.events.find({'organization_id': ObjectId(user.get('organization_id'))})) if 'organization_id' in user else []
+        organizations = []
 
-    return render_template('profile.html', user=user, org=org, running_events=running_events)
+    return render_template('profile.html', user=user, org=org, running_events=running_events, organizations=organizations)
 
 
 @app.route('/change_password', methods=['POST'])
@@ -162,15 +164,16 @@ def manage_users():
 def create_event():
     user = db.users.find_one({'_id': ObjectId(session['user_id'])}) if 'user_id' in session else None
     if request.method == 'POST':
-        title = request.form['title'].strip()
-        description = request.form['description'].strip()
-        location = request.form['location'].strip()
-        venue = request.form['venue'].strip()
-        image = save_image(request.files['event_image'])
-        date = request.form['date']
-        start_time = request.form['start_time']
-        end_time = request.form['end_time']
-        category = request.form['category']
+        title = request.form.get('title', '').strip()
+        description = request.form.get('description', '').strip()
+        location = request.form.get('location', '').strip()
+        venue = request.form.get('venue', '').strip()
+        image = save_image(request.files.get('event_image'))
+        date = request.form.get('date', '')
+        start_time = request.form.get('start_time', '')
+        end_time = request.form.get('end_time', '')
+        category = request.form.get('category', '')
+        organization_id = request.form.get('organization_id') if user.get('role') == 'admin' else user.get('organization_id')
 
         ticket_types = request.form.getlist('ticket_types[]')
         ticket_prices = request.form.getlist('ticket_prices[]')
@@ -196,14 +199,28 @@ def create_event():
             'end_time': edt,
             'category': category,
             'ticket_categories': ticket_categories,
-            'organization_id': ObjectId(user.get('organization_id')) if user and 'organization_id' in user else None
+            'organization_id': ObjectId(organization_id) if organization_id else None
         })
 
         flash('Event created and published successfully!', 'success')
 
         return redirect(url_for('profile'))
     
-    return render_template('create_event.html', user=user)
+    elif request.method == 'GET':
+        if user is None:
+            flash('User not found. Please log in again.', 'danger')
+            return redirect(url_for('login'))
+        
+        if user.get('role') not in ['admin', 'manager']:
+            flash('You do not have permission to create events.', 'danger')
+            return redirect(url_for('profile'))
+        
+        if user.get('role') == 'admin':
+            organizations = list(db.organizations.find())
+        elif user.get('role') == 'manager':
+            organizations = list(db.organizations.find({'_id': ObjectId(user.get('organization_id'))})) if 'organization_id' in user else []
+    
+    return render_template('create_event.html', user=user, organizations=organizations)
 
 @app.route('/login', methods=['GET', 'POST'])
 def login():
