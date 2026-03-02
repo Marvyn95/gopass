@@ -530,22 +530,22 @@ def manage_events():
 @app.route('/pesapal_payment_process', methods=['POST'])
 def pesapal_payment_process():
     if request.method == 'POST':
-        event_id = request.form['event_id']
-        quantity = request.form['quantity']
-        ticket_category = request.form['ticket_category']
-        ticket_price = request.form['ticket_price']
-        total_price = request.form['total_price']
-        event_title = request.form['event_title']
-        event_category = request.form['event_category']
-        event_date = request.form['event_date']
-        event_start_time = request.form['event_start_time']
-        event_end_time = request.form['event_end_time']
-        event_location = request.form['event_location']
-        event_venue = request.form['event_venue']
-        payment_method = request.form['payment_method']
-        phone_number = request.form['phone_number'].strip()
+        event_id = request.form.get('event_id')
+        quantity = request.form.get('quantity')
+        ticket_category = request.form.get('ticket_category')
+        ticket_price = request.form.get('ticket_price')
+        total_price = request.form.get('total_price')
+        event_title = request.form.get('event_title')
+        event_category = request.form.get('event_category')
+        event_date = request.form.get('event_date')
+        event_start_time = request.form.get('event_start_time')
+        event_end_time = request.form.get('event_end_time')
+        event_location = request.form.get('event_location')
+        event_venue = request.form.get('event_venue')
+        payment_method = request.form.get('payment_method')
+        phone_number = request.form.get('phone_number').strip()
 
-        event = db.events.find_one({'_id': ObjectId(event_id)})
+        transaction_id = secrets.token_hex(8)
 
         # logic for pesapal api integration goes here
         token = generate_pesapal_access_token()
@@ -553,15 +553,18 @@ def pesapal_payment_process():
             flash('Error generating access token for payment. Please try again later.', 'danger')
             return redirect(request.referrer)
         
+        with open('../config.json') as config_file:
+            config = json.load(config_file)
+        
         order_details = {
-            "id": f"{secrets.token_hex(16)}",
+            "id": f"{transaction_id}",
             "currency": "UGX",
             "amount": float(total_price),
-            "description": f"Payment for {quantity} tickets to {event_title}",
-            "redirect_mode": "#",
-            "callback_url": "#",
-            "cancellation_url": "#",
-            "notification_id": "",
+            "description": f"Payment for {quantity} {ticket_category} tickets to {event_title}",
+            "redirect_mode": "",
+            "callback_url": f"http://127.0.0.1:5000/ticket_processing?event_id={event_id}&quantity={quantity}&ticket_category={ticket_category}&ticket_price={ticket_price}&total_price={total_price}&event_title={event_title}&event_category={event_category}&event_date={event_date}&event_start_time={event_start_time}&event_end_time={event_end_time}&event_location={event_location}&event_venue={event_venue}&payment_method={payment_method}&phone_number={phone_number}&transaction_id={transaction_id}",
+            "cancellation_url": f"http://127.0.0.1:5000/event_details/{event_id}",
+            "notification_id": config.get('ipn_id'),
             "branch": "MAIN_BRANCH",
             "billing_address": {
                 "phone_number": phone_number,
@@ -580,124 +583,15 @@ def pesapal_payment_process():
             }
         
         order_response = pesa_pal_submit_order_request(token, order_details)
+
         if order_response.get('status') != '200':
             flash('Error submitting order request for payment. Please try again later.', 'danger')
             return redirect(request.referrer)
         elif order_response.get('status') == '200':
             print("lets_go")
+            print(order_response)
+            return redirect(order_response.get('redirect_url'))
 
-        transaction_id = secrets.token_hex(8)
-
-        ticket_io_strs = []
-        for i in range(int(quantity)):
-            booking_id = db.bookings.insert_one({
-                'event_id': ObjectId(event_id),
-                'organization_id': ObjectId(event.get('organization_id')),
-                'ticket_category': ticket_category,
-                'ticket_price': ticket_price,
-                'quantity': int(quantity),
-                'total_price': float(total_price),
-                'payment_method': payment_method,
-                'phone_number': phone_number,
-                'status': 'paid',
-                'booking_date': datetime.now(),
-                'transaction_id': transaction_id
-            }).inserted_id
-
-            qrcode_details = {
-                'event_id': event_id,
-                'event_title': event_title,
-                'event_category': event_category,
-                'event_date': event_date,
-                'start_time': event_start_time,
-                'end_time': event_end_time,
-                'event_location': event_location,
-                'event_venue': event_venue,
-                'ticket_category': ticket_category,
-                'ticket_price': ticket_price,
-                'phone_number': phone_number,
-                'booking_id': str(booking_id),
-                'transaction_id': transaction_id
-            }
-
-            qr = qrcode.QRCode(version=1, box_size=10, border=5)
-            qr.add_data(json.dumps(qrcode_details))
-            qr.make(fit=True)
-
-            img = qr.make_image(fill_color="black", back_color="white")
-            img_io = BytesIO()
-            img.save(img_io, 'PNG')
-            img_io.seek(0)
-            qr_code = base64.b64encode(img_io.getvalue()).decode()
-
-            db.bookings.update_one(
-                {'_id': booking_id},
-                {'$set': {'qr_code': qr_code}}
-            )
-
-            # Creating ticket
-            ticket_width, ticket_height = 600, 200
-            ticket = Image.new('RGB', (ticket_width, ticket_height), color='#f0f0f0')
-            draw = ImageDraw.Draw(ticket)
-
-            # Load event image
-            event_image = Image.open(f"static/event_images/{event.get('image')}")
-            event_image = event_image.resize((ticket_width, ticket_height))
-            event_image.putalpha(int(255 * 0.2))  # Set opacity to 20%
-            ticket.paste(event_image, (0, 0), event_image)
-
-            # Add gradient-like border
-            # draw.rectangle([10, 10, ticket_width-10, ticket_height-10], outline="#000000", width=3)
-
-            # Add event title in header
-            try:
-                title_font = ImageFont.truetype("arial.ttf", 20)
-                detail_font = ImageFont.truetype("DejaVuSans.ttf", 16)  # Changed to a sans-serif font
-            except:
-                title_font = ImageFont.load_default()
-                detail_font = ImageFont.load_default()
-
-            draw.text((30, 25), f"{event_title}", fill="#cb2247", font=title_font, weight="bold")
-
-            # Add event details text on the left side
-            y_offset = 60
-            line_height = 25
-            details = [
-                f"{event_date}  |  {event_start_time} - {event_end_time}",
-                f"{event_location}  |  {event_venue}",
-                f"Ticket : {ticket_category}  |  Qty : {quantity}",
-                f"Price : {ticket_price} UGX",
-                f"Booking ID : {str(booking_id)}"
-            ]
-        
-            for detail in details:
-                draw.text((30, y_offset), detail, fill='#2c3e50', font=detail_font)
-                y_offset += line_height
-
-            # Add vertical line in the middle
-            mid_x = ticket_width // 2
-            draw.line([(mid_x, 15), (mid_x, ticket_height - 15)], fill="#000000", width=2)
-
-            # Add QR code to the right side
-            qr_img = Image.open(BytesIO(base64.b64decode(qr_code)))
-            qr_img = qr_img.resize((150, 150))
-            ticket.paste(qr_img, (390, 25))
-
-            # Save ticket
-            ticket_io = BytesIO()
-            ticket.save(ticket_io, 'PNG')
-            ticket_io.seek(0)
-
-            db.bookings.update_one(
-                {'_id': booking_id},
-                {'$set': {'ticket': base64.b64encode(ticket_io.getvalue()).decode()}}
-            )
-
-            ticket_io_str = base64.b64encode(ticket_io.getvalue()).decode()
-            ticket_io_strs.append({'ticket_io_str': ticket_io_str, 'ticket_id': str(booking_id), 'event_title': event_title})
-                
-        flash('Payment Processed Successfully', 'success')
-        return render_template('ticket.html', event=event, ticket_io_strs=ticket_io_strs)
     
 
 @app.route('/validation')
@@ -711,18 +605,28 @@ def validate_qr():
         try:
             qr_details = json.loads(qr_data)
             booking_id = qr_details.get('booking_id')
+            unique_ticket_id = qr_details.get('unique_ticket_id')
+
             booking = db.bookings.find_one({'_id': ObjectId(booking_id)})
             event_details = db.events.find_one({'_id': ObjectId(booking.get('event_id'))}) if booking else None
+            
             if not booking:
                 flash('Invalid QR Code. Booking not found.', 'danger')
                 return redirect(request.referrer)
-            if booking.get('status') == 'used':
-                flash('This ticket has already been used.', 'warning')
+            
+            if unique_ticket_id not in booking.get('unique_ticket_ids', []):
+                flash('Invalid QR Code. Ticket ID does not match booking.', 'danger')
                 return redirect(request.referrer)
+            
+            if unique_ticket_id in booking.get('used_ticket_ids', []):
+                flash('This ticket has already been used for entry.', 'warning')
+                return redirect(request.referrer)
+
             db.bookings.update_one(
                 {'_id': ObjectId(booking_id)},
-                {'$set': {'status': 'used'}}
+                {'$push': {'used_ticket_ids': unique_ticket_id}}
             )
+            
             flash(f'Ticket is valid for {event_details.get("title") if event_details else "Unknown Event"}.', 'success')
         except Exception as e:
             flash('Error processing QR Code. Please try again.', 'danger')
@@ -810,3 +714,168 @@ def event_search():
     now = datetime.now()
     today_events = [event for event in events if event.get('date').date() == now.date()]
     return render_template('events.html', events=events, today_events=today_events, user=user, query=query)
+
+
+
+@app.route('/ipn', methods=['GET', 'POST'])
+def ipn():
+    if request.method == 'POST':
+        data = request.get_json()
+        print("IPN Data Received:", data)
+        db.ipn_logs.insert_one({
+            'data': data,
+            'timestamp': datetime.now()
+        })
+    return "IPN received", 200
+
+
+@app.route('/ticket_processing')
+def ticket_processing():
+    event_id = request.args.get('event_id')
+    quantity = request.args.get('quantity')
+    ticket_category = request.args.get('ticket_category')
+    ticket_price = request.args.get('ticket_price')
+    total_price = request.args.get('total_price')
+    event_title = request.args.get('event_title')
+    event_category = request.args.get('event_category')
+    event_date = request.args.get('event_date')
+    event_start_time = request.args.get('event_start_time')
+    event_end_time = request.args.get('event_end_time')
+    event_location = request.args.get('event_location')
+    event_venue = request.args.get('event_venue')
+    payment_method = request.args.get('payment_method')
+    phone_number = request.args.get('phone_number')
+    transaction_id = request.args.get('transaction_id')
+
+    event = db.events.find_one({'_id': ObjectId(event_id)})
+
+    booking = db.bookings.find_one({'transaction_id': transaction_id})
+    
+    
+    if booking:
+        flash('The transaction for these tickets has already been processed.', 'warning')
+        ticket_io_strs = []
+        for i in range(int(booking.get('quantity', 1))):
+            ticket_io_strs.append({'ticket_io_str': booking.get('tickets', [])[i], 'ticket_id': str(booking.get('_id')), 'event_title': event_title})
+
+        return render_template('ticket.html', event=event, ticket_io_strs=ticket_io_strs)
+    
+    booking_id = db.bookings.insert_one({
+        'event_id': ObjectId(event_id),
+        'organization_id': ObjectId(event.get('organization_id')),
+        'ticket_category': ticket_category,
+        'ticket_price': ticket_price,
+        'quantity': int(quantity),
+        'total_price': float(total_price),
+        'payment_method': payment_method,
+        'phone_number': phone_number,
+        'status': 'paid',
+        'booking_date': datetime.now(),
+        'transaction_id': transaction_id
+        }).inserted_id
+    
+    ticket_io_strs = []
+    for i in range(int(quantity)):
+        # creating qr code for the ticket
+        unique_ticket_id = secrets.token_hex(8)
+
+        qrcode_details = {
+            'event_id': event_id,
+            'event_title': event_title,
+            'event_category': event_category,
+            'event_date': event_date,
+            'start_time': event_start_time,
+            'end_time': event_end_time,
+            'event_location': event_location,
+            'event_venue': event_venue,
+            'ticket_category': ticket_category,
+            'ticket_price': ticket_price,
+            'phone_number': phone_number,
+            'booking_id': str(booking_id),
+            'transaction_id': transaction_id,
+            'unique_ticket_id': str(unique_ticket_id)
+        }
+
+        qr = qrcode.QRCode(version=1, box_size=10, border=5)
+        qr.add_data(json.dumps(qrcode_details))
+        qr.make(fit=True)
+
+        img = qr.make_image(fill_color="black", back_color="white")
+        img_io = BytesIO()
+        img.save(img_io, 'PNG')
+        img_io.seek(0)
+        qr_code = base64.b64encode(img_io.getvalue()).decode()
+
+        db.bookings.update_one(
+            {'_id': booking_id},
+            {'$push': {'qr_code': qr_code}}
+        )
+
+        db.bookings.update_one(
+            {'_id': booking_id},
+            {'$push': {'unique_ticket_ids': unique_ticket_id}}
+        )
+
+        # Creating ticket
+        ticket_width, ticket_height = 600, 200
+        ticket = Image.new('RGB', (ticket_width, ticket_height), color='#f0f0f0')
+        draw = ImageDraw.Draw(ticket)
+
+        # Load event image
+        event_image = Image.open(f"static/event_images/{event.get('image')}")
+        event_image = event_image.resize((ticket_width, ticket_height))
+        event_image.putalpha(int(255 * 0.2))  # Set opacity to 20%
+        ticket.paste(event_image, (0, 0), event_image)
+
+        # Add gradient-like border
+        # draw.rectangle([10, 10, ticket_width-10, ticket_height-10], outline="#000000", width=3)
+
+        # Add event title in header
+        try:
+            title_font = ImageFont.truetype("arial.ttf", 20)
+            detail_font = ImageFont.truetype("DejaVuSans.ttf", 16)  # Changed to a sans-serif font
+        except:
+            title_font = ImageFont.load_default()
+            detail_font = ImageFont.load_default()
+
+        draw.text((30, 25), f"{event_title}", fill="#cb2247", font=title_font, weight="bold")
+
+        # Add event details text on the left side
+        y_offset = 60
+        line_height = 25
+        details = [
+            f"{event_date}  |  {event_start_time} - {event_end_time}",
+            f"{event_location}  |  {event_venue}",
+            f"Ticket : {ticket_category}  |  Qty : {quantity}",
+            f"Price : {ticket_price} UGX",
+            f"Booking ID : {str(booking_id)}"
+        ]
+    
+        for detail in details:
+            draw.text((30, y_offset), detail, fill='#2c3e50', font=detail_font)
+            y_offset += line_height
+
+        # Add vertical line in the middle
+        mid_x = ticket_width // 2
+        draw.line([(mid_x, 15), (mid_x, ticket_height - 15)], fill="#000000", width=2)
+
+        # Add QR code to the right side
+        qr_img = Image.open(BytesIO(base64.b64decode(qr_code)))
+        qr_img = qr_img.resize((150, 150))
+        ticket.paste(qr_img, (390, 25))
+
+        # Save ticket
+        ticket_io = BytesIO()
+        ticket.save(ticket_io, 'PNG')
+        ticket_io.seek(0)
+
+        db.bookings.update_one(
+            {'_id': booking_id},
+            {'$push': {'tickets': base64.b64encode(ticket_io.getvalue()).decode()}}
+        )
+
+        ticket_io_str = base64.b64encode(ticket_io.getvalue()).decode()
+        ticket_io_strs.append({'ticket_io_str': ticket_io_str, 'ticket_id': str(booking_id), 'event_title': event_title})
+                
+    flash('Payment Processed Successfully', 'success')
+    return render_template('ticket.html', event=event, ticket_io_strs=ticket_io_strs)

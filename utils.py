@@ -1,5 +1,8 @@
 import os
 import secrets
+from wsgiref import headers
+
+from dns.query import https
 from __init__ import app
 import json
 import requests
@@ -12,6 +15,7 @@ def save_image(file):
     image_path = os.path.join(app.root_path, 'static/event_images', image_name)
     file.save(image_path)
     return image_name
+
 
 def delete_image(image_name):
     image_path = os.path.join(app.root_path, 'static/event_images', image_name)
@@ -43,6 +47,7 @@ def generate_pesapal_access_token():
         return None
 
 
+
 def pesa_pal_submit_order_request(token, order_details):
     headers = {
         'Authorization': f'Bearer {token}',
@@ -53,5 +58,44 @@ def pesa_pal_submit_order_request(token, order_details):
     params = order_details
 
     response = requests.post('https://cybqa.pesapal.com/pesapalv3/api/Transactions/SubmitOrderRequest', headers=headers, json=params)
-    print(response.json())
+    return response.json()
+
+
+
+def register_IPN_URL():
+    token = generate_pesapal_access_token()
+    
+    if token is None:
+        print('Error generating access token for IPN registration. Please check your credentials and try again.')
+        return None
+    
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    }
+    
+    params = {
+        "url": "https://www.gopass.space/ipn",
+        "ipn_notification_type": "GET"
+    }
+
+    response = requests.post('https://cybqa.pesapal.com/pesapalv3/api/URLSetup/RegisterIPN', headers=headers, json=params)
+    return response.json()
+
+
+def get_IPN_url():
+    token = generate_pesapal_access_token()
+    
+    if token is None:
+        print('Error generating access token for IPN retrieval. Please check your credentials and try again.')
+        return None
+    
+    headers = {
+        'Authorization': f'Bearer {token}',
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'
+    }
+
+    response = requests.get('https://cybqa.pesapal.com/pesapalv3/api/URLSetup/GetIpnList', headers=headers)
     return response.json()
