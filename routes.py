@@ -805,11 +805,6 @@ def ticket_processing():
 
         db.bookings.update_one(
             {'_id': booking_id},
-            {'$push': {'qr_code': qr_code}}
-        )
-
-        db.bookings.update_one(
-            {'_id': booking_id},
             {'$push': {'unique_ticket_ids': unique_ticket_id}}
         )
 
