@@ -562,8 +562,8 @@ def pesapal_payment_process():
             "amount": float(total_price),
             "description": f"Payment for {quantity} {ticket_category} tickets to {event_title}",
             "redirect_mode": "",
-            "callback_url": f"http://127.0.0.1:5000/ticket_processing?event_id={event_id}&quantity={quantity}&ticket_category={ticket_category}&ticket_price={ticket_price}&total_price={total_price}&event_title={event_title}&event_category={event_category}&event_date={event_date}&event_start_time={event_start_time}&event_end_time={event_end_time}&event_location={event_location}&event_venue={event_venue}&payment_method={payment_method}&phone_number={phone_number}&transaction_id={transaction_id}",
-            "cancellation_url": f"http://127.0.0.1:5000/event_details/{event_id}",
+            "callback_url": f"https://gopass.space/ticket_processing?event_id={event_id}&quantity={quantity}&ticket_category={ticket_category}&ticket_price={ticket_price}&total_price={total_price}&event_title={event_title}&event_category={event_category}&event_date={event_date}&event_start_time={event_start_time}&event_end_time={event_end_time}&event_location={event_location}&event_venue={event_venue}&payment_method={payment_method}&phone_number={phone_number}&transaction_id={transaction_id}",
+            "cancellation_url": f"https://gopass.space/event_details/{event_id}",
             "notification_id": config.get('ipn_id'),
             "branch": "MAIN_BRANCH",
             "billing_address": {
