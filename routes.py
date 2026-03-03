@@ -588,8 +588,6 @@ def pesapal_payment_process():
             flash('Error submitting order request for payment. Please try again later.', 'danger')
             return redirect(request.referrer)
         elif order_response.get('status') == '200':
-            print("lets_go")
-            print(order_response)
             return redirect(order_response.get('redirect_url'))
 
     
@@ -721,7 +719,6 @@ def event_search():
 def ipn():
     if request.method == 'POST':
         data = request.get_json()
-        print("IPN Data Received:", data)
         db.ipn_logs.insert_one({
             'data': data,
             'timestamp': datetime.now()
@@ -751,12 +748,11 @@ def ticket_processing():
 
     booking = db.bookings.find_one({'transaction_id': transaction_id})
     
-    
     if booking:
         flash('The transaction for these tickets has already been processed.', 'warning')
         ticket_io_strs = []
         for i in range(int(booking.get('quantity', 1))):
-            ticket_io_strs.append({'ticket_io_str': booking.get('tickets', [])[i], 'ticket_id': str(booking.get('_id')), 'event_title': event_title})
+            ticket_io_strs.append({'ticket_io_str': booking.get('tickets', [])[i], 'ticket_id': str(booking.get('unique_ticket_ids', [])[i]), 'event_title': event_title})
 
         return render_template('ticket.html', event=event, ticket_io_strs=ticket_io_strs)
     
@@ -774,11 +770,12 @@ def ticket_processing():
         'transaction_id': transaction_id
         }).inserted_id
     
+    print("Booking ID:", booking_id)
+    
     ticket_io_strs = []
     for i in range(int(quantity)):
-        # creating qr code for the ticket
         unique_ticket_id = secrets.token_hex(8)
-
+        # creating qr code for the ticket
         qrcode_details = {
             'event_id': event_id,
             'event_title': event_title,
@@ -875,7 +872,7 @@ def ticket_processing():
         )
 
         ticket_io_str = base64.b64encode(ticket_io.getvalue()).decode()
-        ticket_io_strs.append({'ticket_io_str': ticket_io_str, 'ticket_id': str(booking_id), 'event_title': event_title})
+        ticket_io_strs.append({'ticket_io_str': ticket_io_str, 'ticket_id': str(unique_ticket_id), 'event_title': event_title})
                 
     flash('Payment Processed Successfully', 'success')
     return render_template('ticket.html', event=event, ticket_io_strs=ticket_io_strs)
