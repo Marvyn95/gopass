@@ -512,6 +512,8 @@ def buy_tickets():
         total_price = quantity * float(ticket_price)
 
         return render_template('payment_page.html', event=event, ticket_price=ticket_price, ticket_category=ticket_category, quantity=quantity, total_price=total_price)
+    elif request.method == 'GET':
+        return redirect(url_for('events'))
 
 
 @app.route('/manage_events')
