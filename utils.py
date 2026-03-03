@@ -99,5 +99,3 @@ def get_IPN_url():
 
     response = requests.get('https://pay.pesapal.com/v3/api/URLSetup/GetIpnList', headers=headers)
     return response.json()
-
-print(register_IPN_URL())
