@@ -39,7 +39,7 @@ def generate_pesapal_access_token():
         'consumer_secret': consumer_secret
     }
 
-    response = requests.post('https://cybqa.pesapal.com/pesapalv3/api/Auth/RequestToken', headers=headers, json=params)
+    response = requests.post('https://pay.pesapal.com/v3/api/Auth/RequestToken', headers=headers, json=params)
     if response.json().get('status') == '200':
         token = response.json().get('token')
         return  token
@@ -57,7 +57,7 @@ def pesa_pal_submit_order_request(token, order_details):
 
     params = order_details
 
-    response = requests.post('https://cybqa.pesapal.com/pesapalv3/api/Transactions/SubmitOrderRequest', headers=headers, json=params)
+    response = requests.post('https://pay.pesapal.com/v3/api/Transactions/SubmitOrderRequest', headers=headers, json=params)
     return response.json()
 
 
@@ -76,11 +76,11 @@ def register_IPN_URL():
     }
     
     params = {
-        "url": "https://www.gopass.space/ipn",
+        "url": "https://gopass.space/ipn",
         "ipn_notification_type": "GET"
     }
 
-    response = requests.post('https://cybqa.pesapal.com/pesapalv3/api/URLSetup/RegisterIPN', headers=headers, json=params)
+    response = requests.post('https://pay.pesapal.com/v3/api/URLSetup/RegisterIPN', headers=headers, json=params)
     return response.json()
 
 
@@ -97,5 +97,7 @@ def get_IPN_url():
         'Content-Type': 'application/json'
     }
 
-    response = requests.get('https://cybqa.pesapal.com/pesapalv3/api/URLSetup/GetIpnList', headers=headers)
+    response = requests.get('https://pay.pesapal.com/v3/api/URLSetup/GetIpnList', headers=headers)
     return response.json()
+
+print(register_IPN_URL())
