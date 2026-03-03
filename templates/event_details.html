@@ -107,8 +107,22 @@
                     </select>
 
                     <label class="form-label">Quantity</label>
-                    <input type="number" class="form-control form-control-sm border-dark"
+                    <div class="input-group input-group-sm">
+                      <button class="btn btn-outline-secondary" type="button" onclick="decreaseQuantity(this)">−</button>
+                      <input type="number" class="form-control form-control-sm border-dark text-center"
                          name="quantity" min="1" value="1" required>
+                      <button class="btn btn-outline-secondary" type="button" onclick="increaseQuantity(this)">+</button>
+                    </div>
+                    <script>
+                      function increaseQuantity(btn) {
+                      const input = btn.parentElement.querySelector('input[name="quantity"]');
+                      input.value = parseInt(input.value) + 1;
+                      }
+                      function decreaseQuantity(btn) {
+                      const input = btn.parentElement.querySelector('input[name="quantity"]');
+                      if (parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
+                      }
+                    </script>
                     </div>
 
                     <div class="modal-footer py-2 border-0">
