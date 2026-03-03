@@ -1,290 +1,151 @@
 {% extends 'base.html' %}
-
 {% block content %}
+
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
 
 <div class="container mt-5">
   <div class="row justify-content-center">
-    <div class="event-card col-md-8" role="region" aria-label="Event details">
+    <div class="col-md-8 event-card mt-3">
 
-      <div class="event-header mt-2">
-        <div class="d-flex flex-wrap flex-column">
-          <h3 class="title text-primary">
-            {{ event.title }}
-          </h3>
+      <!-- Header -->
+      <div class="event-header">
 
-            <div class="row">
-              <div class="col-md-6">
-              <div class="d-flex justify-content-between align-items-start flex-wrap">
-                <div class="text-dark">
-                <p class="mb-1"><i class="bi bi-calendar-event text-primary"></i> {{ event.date.strftime('%d %b %Y') }}</p>
-                <p class="mb-1"><i class="bi bi-clock text-primary"></i> {{ event.start_time.strftime('%I:%M %p') }}{% if event.end_time %} — {{ event.end_time.strftime('%I:%M %p') }}{% endif %}</p>
-                <p class="mb-1"><i class="bi bi-geo-alt text-primary"></i> {{ event.location }}, <span class="text-primary"> {{ event.venue }}</span> </p>
-                </div>
-              </div>
-              </div>
+        <h4 class="text-primary mb-1">
+          {{ event.title }}
+        </h4>
 
-              <!-- <div class="col-md-6 d-flex justify-content-start align-items-start flex-column">
-                <p class="label text-primary fw-semibold fs-6 mb-2"><i class="bi bi-book text-primary"></i> Bookings</p>
-                <div class="d-flex flex-wrap">
-                  {% if bookings_by_category == {} %}
-                    {% if event.ticket_categories.values() | map('int', default=0) | sum == 0 %}
-                      <span class="text-dark">Free Event</span>
-                    {% else %}
-                      <span class="text-dark">No bookings yet. Be the first to book!</span>
-                    {% endif %}
-                  {% else %}
-                    {% for cat in bookings_by_category.keys() %}
-                    <span class="text-dark">{{ cat|title }}: <span class="text-primary">{{ bookings_by_category[cat] }}</span></span>{% if not loop.last %}, {% endif %}
-                    {% endfor %}
-                  {% endif %}
-                </div>
-              </div> -->
+        <!-- Meta -->
+        <div class="text-dark mb-2 small">
 
-            </div>
+          <p class="mb-1">
+            <i class="bi bi-calendar-event text-primary"></i>
+            {{ event.date.strftime('%d %b %Y') }}
+          </p>
+
+          <p class="mb-1">
+            <i class="bi bi-clock text-primary"></i>
+            {{ event.start_time.strftime('%I:%M %p') }}
+            {% if event.end_time %}
+              — {{ event.end_time.strftime('%I:%M %p') }}
+            {% endif %}
+          </p>
+
+          <p class="mb-1">
+            <i class="bi bi-geo-alt text-primary"></i>
+            {{ event.location }},
+            <span class="text-primary">{{ event.venue }}</span>
+          </p>
 
         </div>
+
 
         <!-- Image + Details -->
-        <div class="row mt-3 align-items-start">
+        <div class="row g-2 mb-2">
+
           {% if event.image %}
-          <div class="col-lg-5 col-md-6 mb-3 mb-md-0">
+          <div class="col-md-5 text-center">
             <img src="{{ url_for('static', filename='event_images/' + event.image) }}"
-           alt="{{ event.title }}"
-           class="img-fluid rounded"
-           style="max-width:100%; width:350px;">
+                 class="img-fluid rounded"
+                 style="max-width: 100%; width: 300px;">
           </div>
           {% endif %}
 
-          <div class="col-lg-7 col-md-6">
-            <div class="label text-primary fw-semibold">Details</div>
-            <div class="card-panel">
-              {% if event.description %}
-          <div class="text-dark">{{ event.description }}</div>
-              {% else %}
-          <em class="small-muted text-dark">No description provided.</em>
-              {% endif %}
+          <div class="col-md-7">
 
-              <div class="d-flex gap-2 flex-wrap mt-1">
-          <div class="chip text-dark">🎵 Event type: {{ event.category }}</div>
-          <div class="chip text-dark">🎫 Tickets Available</div>
-              </div>
+            <div class="fw-semibold text-primary mb-1">
+              Details
             </div>
+
+            <div class="small mb-2 text-dark">
+              {% if event.description %}
+                {{ event.description }}
+              {% else %}
+                <em>No description provided.</em>
+              {% endif %}
+            </div>
+
+            <div class="d-flex gap-2 flex-wrap small">
+              <div class="chip">🎵 {{ event.category }}</div>
+              <div class="chip">🎫 Tickets Available</div>
+            </div>
+
           </div>
+
         </div>
       </div>
+
 
       <!-- Ticket Prices -->
-      <div class="grid mb-1">
-        <div class="left">
-          <div class="label text-primary mt-4 fw-semibold">Ticket Prices</div>
-          <div class="card-panel">
-            {% for category, price in event.ticket_categories.items() %}
-              <div class="d-flex justify-content-between py-2 border-bottom border-secondary">
-                <span class="text-dark">{{ category|title }}</span>
-                <span class="fw-bold text-dark">{% if price != '0' %}UGX {{ "{:,}".format(price|int) }}{% elif price == '0' %}🎉 Free Entry{% endif %}</span>
-              </div>
-            {% endfor %}
-          </div>
+      <div class="mb-2">
+
+        <div class="fw-semibold text-primary mb-1">
+          Ticket Prices
         </div>
 
-        <div class="d-flex justify-content-between align-items-center flex-wrap mt-2">      
-          {% if user == None and free_entry == False or user != None and user.organization_id|string != event.organization_id|string and free_entry == False %}
-          <button class="btn btn-success mt-2"
-                  data-bs-toggle="modal"
-                  data-bs-target="#buyTicketsModal{{ event._id }}">
-            <i class="bi bi-ticket-perforated"></i> Buy Tickets
-          </button>
-          {% endif %}
+        <div class="card-panel small">
+
+          {% for category, price in event.ticket_categories.items() %}
+          <div class="d-flex justify-content-between py-1 border-bottom">
+
+            <span>{{ category|title }}</span>
+
+            <span class="fw-bold">
+              {% if price != '0' %}
+                UGX {{ "{:,}".format(price|int) }}
+              {% else %}
+                🎉 Free
+              {% endif %}
+            </span>
+
+          </div>
+          {% endfor %}
+
         </div>
 
-                <!-- Buy Tickets Modal -->
-                <div class="modal fade" id="buyTicketsModal{{ event._id }}" tabindex="-1"
-                   aria-labelledby="buyTicketsModalLabel{{ event._id }}" aria-hidden="true">
-                <div class="modal-dialog modal-dialog-centered modal-sm" style="max-width: 350px;">
-                  <div class="modal-content bg-light text-dark border-0">
-                  <div class="modal-header py-2 border-0">
-                  <h6 class="modal-title text-center w-100" id="buyTicketsModalLabel{{ event._id }}">Buy Tickets</h6>
-                  <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                  </div>
-
-                  <form method="POST" action="{{ url_for('buy_tickets') }}">
-                  <input type="hidden" name="event_id" value="{{ event._id }}">
-                  <div class="modal-body py-2">
-                  <label class="form-label">Select Ticket Type</label>
-                  <select class="form-select form-select-sm border-dark mb-3"
-                  name="ticket_category" required>
-                  {% for category in event.ticket_categories.keys() %}
-                  <option value="{{ category }}">
-                  {{ category|title }} - UGX {{ event.ticket_categories[category] }}
-                  </option>
-                  {% endfor %}
-                  </select>
-
-                  <label class="form-label">Quantity</label>
-                  <div class="input-group input-group-sm">
-                  <button class="btn btn-outline-secondary" type="button" id="decreaseQty">−</button>
-                  <input type="number" class="form-control form-control-sm border-dark text-center"
-                   name="quantity" min="1" value="1" id="qtyInput" required>
-                  <button class="btn btn-outline-secondary" type="button" id="increaseQty">+</button>
-                  </div>
-                  <script>
-                  document.getElementById('increaseQty').addEventListener('click', function() {
-                  let input = document.getElementById('qtyInput');
-                  input.value = parseInt(input.value) + 1;
-                  });
-                  document.getElementById('decreaseQty').addEventListener('click', function() {
-                  let input = document.getElementById('qtyInput');
-                  if (parseInt(input.value) > 1) input.value = parseInt(input.value) - 1;
-                  });
-                  </script>
-                  </div>
-
-                  <div class="modal-footer py-2 border-0 d-flex justify-content-center gap-2">
-                  <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">
-                  Cancel
-                  </button>
-                  <button type="submit" class="btn btn-success btn-sm">
-                  Proceed to Checkout
-                  </button>
-                  </div>
-                  </form>
-                  </div>
-                </div>
-                </div>
-
-        <aside>
-          <!-- Edit/Delete Buttons -->
-          {% if user and user.role in ['manager'] and user.organization_id|string == event.organization_id|string or user and user.role == 'admin' %}
-          <div class="mt-4 d-flex gap-2">
-            <!-- Edit Event Modal Trigger -->
-            <button type="button" class="btn btn-outline-primary btn-sm" data-bs-toggle="modal" data-bs-target="#editEventModal{{ event._id }}">
-              <i class="bi bi-pencil"></i> Edit
-            </button>
-            <!-- Delete Event Modal Trigger -->
-            <button type="button" class="btn btn-outline-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteEventModal{{ event._id }}">
-              <i class="bi bi-trash"></i> Delete
-            </button>
-          </div>
-
-          <!-- Edit Event Modal -->
-          <div class="modal fade" id="editEventModal{{ event._id }}" tabindex="-1" aria-labelledby="editEventModalLabel{{ event._id }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-lg">
-              <div class="modal-content bg-light text-dark border-0">
-            <form method="POST" action="{{ url_for('edit_event') }}" enctype="multipart/form-data">
-              <input type="hidden" name="event_id" value="{{ event._id }}">
-              <div class="modal-header py-2 border-0">
-                <h6 class="modal-title text-dark" id="editEventModalLabel{{ event._id }}">Edit Event</h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body py-2">
-                <div class="mb-2">
-                  <label for="title{{ event._id }}" class="form-label mb-1 text-dark">Title</label>
-                  <input type="text" id="title{{ event._id }}" class="form-control form-control-sm border-dark" name="title" value="{{ event.title }}" required>
-                </div>
-                <div class="mb-2">
-                  <label for="description{{ event._id }}" class="form-label mb-1 text-dark">Description</label>
-                  <textarea id="description{{ event._id }}" class="form-control form-control-sm border-dark" name="description" rows="3" required>{{ event.description }}</textarea>
-                </div>
-                <div class="row">
-                  <div class="col-md-6 mb-2">
-                <label for="location{{ event._id }}" class="form-label mb-1 text-dark">Location</label>
-                <select id="location{{ event._id }}" class="form-select form-select-sm border-dark" name="location" required>
-                  <option value="{{ event.location }}" selected>{{ event.location }}</option>
-                  <option>Kampala</option><option>Jinja</option><option>Mbarara</option>
-                  <option>Mbale</option><option>Fort Portal</option><option>Entebbe</option>
-                  <option>Wakiso</option><option>Hoima</option><option>Gulu</option><option>Arua</option>
-                </select>
-                  </div>
-                  <div class="col-md-6 mb-2">
-                <label for="venue{{ event._id }}" class="form-label mb-1 text-dark">Venue</label>
-                <input type="text" id="venue{{ event._id }}" class="form-control form-control-sm border-dark" name="venue" value="{{ event.venue }}" required>
-                  </div>
-                </div>
-                <div class="mb-2">
-                  <label for="image{{ event._id }}" class="form-label mb-1 text-dark">Update Event Image</label>
-                  <input type="file" id="image{{ event._id }}" class="form-control form-control-sm border-dark" name="event_image" accept="image/*">
-                </div>
-                <div class="row">
-                  <div class="col-md-4 mb-2">
-                <label for="date{{ event._id }}" class="form-label mb-1 text-dark">Date</label>
-                <input type="date" id="date{{ event._id }}" class="form-control form-control-sm border-dark" name="date" value="{{ event.date.strftime('%Y-%m-%d') }}" required>
-                  </div>
-                  <div class="col-md-4 mb-2">
-                <label for="start_time{{ event._id }}" class="form-label mb-1 text-dark">Start</label>
-                <input type="time" id="start_time{{ event._id }}" class="form-control form-control-sm border-dark" name="start_time" value="{{ event.start_time.strftime('%H:%M') }}" required>
-                  </div>
-                  <div class="col-md-4 mb-2">
-                <label for="end_time{{ event._id }}" class="form-label mb-1 text-dark">End</label>
-                <input type="time" id="end_time{{ event._id }}" class="form-control form-control-sm border-dark" name="end_time" value="{{ event.end_time.strftime('%H:%M') }}" required>
-                  </div>
-                </div>
-                <div class="mb-2">
-                  <label for="category{{ event._id }}" class="form-label mb-1 text-dark">Event Category</label>
-                  <select id="category{{ event._id }}" class="form-select form-select-sm border-dark" name="category" required>
-                <option value="{{ event.category }}" selected>{{ event.category }}</option>
-                <option>Music</option>
-                <option>Sports</option>
-                <option>Conference</option>
-                <option>Workshop</option>
-                <option>Seminar</option>
-                <option>Festival</option>
-                <option>Meetup</option>
-                <option>Other</option>
-                  </select>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label text-dark">Ticket Categories</label>
-                  <div id="ticket-types-list">
-                {% for key, value in event.ticket_categories.items() %}
-                <div class="input-group mb-2 ticket-type-item">
-                  <input type="text" class="form-control border-dark me-1" name="ticket_types[]" value="{{ key }}" required>
-                  <input type="number" class="form-control border-dark" name="ticket_prices[]" value="{{ value }}" min="0" step="0.01" required>
-                  <button type="button" class="btn btn-outline-danger remove-ticket-type" title="Remove">&times;</button>
-                </div>
-                {% endfor %}
-                <div class="input-group mb-2 ticket-type-item">
-                  <input type="text" class="form-control border-dark me-1" name="ticket_types[]" placeholder="Category">
-                  <input type="number" class="form-control border-dark" name="ticket_prices[]" placeholder="Price" min="0" step="0.01">
-                  <button type="button" class="btn btn-outline-danger remove-ticket-type" title="Remove">&times;</button>
-                </div>
-                  </div>
-                  <button type="button" class="btn btn-outline-primary btn-sm mt-1" id="add-ticket-type">Add Category</button>
-                </div>
-              </div>
-              <div class="modal-footer py-2 border-0">
-                <button type="submit" class="btn btn-primary btn-sm">Save Changes</button>
-              </div>
-            </form>
-              </div>
-            </div>
-          </div>
-
-          <!-- Delete Event Modal -->
-          <div class="modal fade" id="deleteEventModal{{ event._id }}" tabindex="-1" aria-labelledby="deleteEventModalLabel{{ event._id }}" aria-hidden="true">
-            <div class="modal-dialog modal-dialog-centered modal-sm">
-              <div class="modal-content bg-light text-dark border-0">
-            <form method="POST" action="{{ url_for('delete_event')}}">
-                <input type="hidden" name="event_id" value="{{ event._id }}">
-              <div class="modal-header py-2 border-0">
-                <h6 class="modal-title text-dark" id="deleteEventModalLabel{{ event._id }}">Delete Event</h6>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-              </div>
-              <div class="modal-body py-2">
-                <p>Are you sure you want to delete this event?</p>
-              </div>
-              <div class="modal-footer py-2 border-0">
-                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
-                <button type="submit" class="btn btn-danger btn-sm">Delete</button>
-              </div>
-            </form>
-              </div>
-            </div>
-          </div>
-          {% endif %}
-
-        </aside>
       </div>
+
+
+      <!-- Buy Button -->
+      <div class="mb-2">
+
+        {% if user == None and free_entry == False or
+              user != None and
+              user.organization_id|string != event.organization_id|string and
+              free_entry == False %}
+
+        <button class="btn btn-success btn-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#buyTicketsModal{{ event._id }}">
+          <i class="bi bi-ticket-perforated"></i> Buy Tickets
+        </button>
+
+        {% endif %}
+
+      </div>
+
+
+      <!-- Admin Buttons -->
+      {% if user and user.role in ['manager','admin'] and
+            user.organization_id|string == event.organization_id|string %}
+
+      <div class="d-flex gap-2 mb-2">
+
+        <button class="btn btn-outline-primary btn-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#editEventModal{{ event._id }}">
+          <i class="bi bi-pencil"></i> Edit
+        </button>
+
+        <button class="btn btn-outline-danger btn-sm"
+                data-bs-toggle="modal"
+                data-bs-target="#deleteEventModal{{ event._id }}">
+          <i class="bi bi-trash"></i> Delete
+        </button>
+
+      </div>
+
+      {% endif %}
+
 
     </div>
   </div>
