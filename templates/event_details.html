@@ -99,8 +99,8 @@
                     <label class="form-label">Select Ticket Type</label>
                     <select class="form-select form-select-sm border-dark mb-3"
                         name="ticket_category" required>
-                      <option value="">-- Choose Category --</option>
                       {% for category in event.ticket_categories.keys() %}
+                      <option value="{{ category }}">
                         {{ category|title }} - UGX {{ event.ticket_categories[category] }}
                       </option>
                       {% endfor %}
