@@ -1,0 +1,47 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="mt-5">
+    <div class="event-header mt-4">
+        <h4 class="title text-primary bold">{{ event.title }}</h4>
+        <div class="text-dark mt-3">
+            <p class="mb-2"><i class="bi bi-calendar-event text-primary"></i> {{ event.date.strftime('%d %b %Y') }}  |  <i class="bi bi-clock text-primary"></i> {{ event.start_time.strftime('%I:%M %p') }}{% if event.end_time %} — {{ event.end_time.strftime('%I:%M %p') }}{% endif %}  |  <i class="bi bi-geo-alt text-primary"></i> {{ event.location }}, <span class="text-primary">{{ event.venue }}</span></p>
+        </div>
+    </div>
+    <div class="d-flex gap-2 flex-wrap mt-3">
+        <div class="chip text-dark">🎵 {{ event.category }}</div>{% if event.date < now %}<span class="badge bg-secondary">Past Event</span>{% endif %}
+    </div>
+</div>
+
+
+<div class="mt-4">
+    <div class="label text-primary fw-semibold">Booking Details</div>
+    <div class="table-responsive">
+        <table class="table table-sm">
+            <thead class="table-light">
+                <tr>
+                    <th class="text-dark">Date</th>
+                    <th class="text-dark">Phone Number</th>
+                    <th class="text-dark">Ticket Category</th>
+                    <th class="text-dark">Ticket Price</th>
+                    <th class="text-dark">Quantity</th>
+                    <th class="text-dark">Total Price</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td class="text-dark">{{ booking.date.strftime('%d %b %Y') }}</td>
+                    <td class="text-dark">{{ booking.phone_number }}</td>
+                    <td class="text-dark">{{ booking.ticket_category|title }}</td>
+                    <td class="text-dark">UGX {{ "{:,}".format(booking.ticket_price|int) }}</td>
+                    <td class="text-dark">{{ booking.quantity }}</td>
+                    <td class="fw-bold text-dark">UGX {{ "{:,}".format(booking.total_price|int) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

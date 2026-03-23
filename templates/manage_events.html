@@ -9,35 +9,40 @@
     </div>
     {% if events %}
         {% for event in events %}
-          <div class="col-12 col-md-6 col-lg-3 mb-4"> <!-- Changed col-lg-4 to col-lg-3 -->
-                <div class="card h-100 shadow position-relative" style="height: 100%;"> <!-- Added height style -->
+          <div class="col-12 col-md-6 col-lg-3 mb-4" style=" {% if event.date < now %} opacity: 0.6; {% endif %} ">
+                <div class="card h-100 shadow position-relative" style="height: 100%;">
                     <img src="{{ url_for('static', filename='event_images/' ~ event.image) }}"
                          class="card-img-top"
                          alt="{{ event.title }}"
-                         style="height: 160px; object-fit: cover;"> <!-- Reduced height -->
+                         style="height: 160px; object-fit: cover;">
                     <div class="card-body d-flex flex-column">
                         <div class="d-flex justify-content-between align-items-center mb-1">
                             <h6 class="card-title mb-0 text-primary ">
                                 {{ event.title }}
                             </h6>
+                            <span>
+                                {% if event.date < now %}
+                                    <span class="badge bg-secondary">Past Event</span>
+                                {% endif %}
+                            </span>
                         </div>
                         <div class="mb-2">
                             <div class="d-flex align-items-center mb-1">
-                                <i class="bi bi-geo-alt-fill me-1" style="font-size: 1rem;"></i> <!-- Reduced font size -->
+                                <i class="bi bi-geo-alt-fill me-1" style="font-size: 1rem;"></i>
                                 <span class="fw-semibold" style="font-size: 0.9rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 160px;">{{ event.venue }}</span> <!-- Reduced font size and max-width -->
-                                <span class="mx-2 text-muted" style="font-size: 0.85rem;">&#8226;</span> <!-- Reduced font size -->
+                                <span class="mx-2 text-muted" style="font-size: 0.85rem;">&#8226;</span> 
                                 <span class="text-muted small" style="white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100px;">{{ event.location }}</span> <!-- Reduced max-width -->
                             </div>
                             <div class="d-flex align-items-center mb-1">
-                                <i class="bi bi-calendar-event me-1" style="font-size: 0.9rem;"></i> <!-- Reduced font size -->
+                                <i class="bi bi-calendar-event me-1" style="font-size: 0.9rem;"></i> 
                                 <span class="text-muted small">{{ event.date.strftime("%d %b %Y") }}</span>
                                 <span class="mx-2 text-muted">&#8226;</span>
-                                <i class="bi bi-clock me-1" style="font-size: 0.9rem;"></i> <!-- Reduced font size -->
+                                <i class="bi bi-clock me-1" style="font-size: 0.9rem;"></i>
                                 <span class="text-muted small">{{ event.start_time.strftime("%H:%M") }} - {{ event.end_time.strftime("%H:%M") }} hrs</span>
                             </div>
                             <div class="mt-2 mb-0">
                                 <div class="d-flex align-items-start gap-2">
-                                    <i class="bi bi-info-circle" style="color: #3b82f6; font-size: 1rem;"></i> <!-- Reduced font size -->
+                                    <i class="bi bi-info-circle" style="color: #3b82f6; font-size: 1rem;"></i>
                                     <p class="small mb-0" style="
                                         overflow: hidden;
                                         text-overflow: ellipsis;

@@ -15,10 +15,10 @@ import secrets
 @app.route('/events')
 def events():
     user = db.users.find_one({'_id': ObjectId(session['user_id'])}) if 'user_id' in session else None
-    events = list(db.events.find().sort('date'))
+    events = list(db.events.find().sort('date', -1))
     now = datetime.now()
     today_events = [event for event in events if event.get('date').date() == now.date()]
-    return render_template('events.html', events=events, user=user, today_events=today_events)
+    return render_template('events.html', events=events, user=user, today_events=today_events, now=now)
 
 
 @app.route('/home')
@@ -497,7 +497,8 @@ def event_details(event_id):
         else:
             bookings_by_category[category] += int(booking.get('quantity', 1))
 
-    return render_template('event_details.html', event=event, user=user, free_entry=free_entry, bookings_by_category=bookings_by_category)
+    now = datetime.now()
+    return render_template('event_details.html', event=event, user=user, free_entry=free_entry, bookings_by_category=bookings_by_category, now=now)
 
 
 @app.route('/buy_tickets', methods=['GET','POST'])
@@ -520,13 +521,15 @@ def buy_tickets():
 def manage_events():
     user = db.users.find_one({'_id': ObjectId(session['user_id'])}) if 'user_id' in session else None
     if user.get('role') == 'admin':
-        events = list(db.events.find().sort('date'))
+        events = list(db.events.find().sort('date', -1))
         organizations = list(db.organizations.find())
         for event in events:
             event['organization_name'] = next((org['name'] for org in organizations if str(org['_id']) == str(event.get('organization_id'))), 'N/A') if event.get('organization_id') else 'N/A'
     else:
-        events = list(db.events.find({'organization_id': ObjectId(user.get('organization_id'))}).sort('date')) if user and 'organization_id' in user else []
-    return render_template('manage_events.html', events=events, user=user)
+        events = list(db.events.find({'organization_id': ObjectId(user.get('organization_id'))}).sort('date', -1)) if user and 'organization_id' in user else []
+
+    now = datetime.now()
+    return render_template('manage_events.html', events=events, user=user, now=now)
 
 
 @app.route('/pesapal_payment_process', methods=['POST'])
@@ -873,3 +876,14 @@ def ticket_processing():
                 
     flash('Payment Processed Successfully', 'success')
     return render_template('ticket.html', event=event, ticket_io_strs=ticket_io_strs)
+
+
+@app.route('/event_numbers/<event_id>')
+def event_numbers(event_id):
+    event = db.events.find_one({'_id': ObjectId(event_id)})
+    bookings = list(db.bookings.find({'event_id': ObjectId(event_id)}))
+    if not event:
+        flash('Event not found', 'danger')
+        return redirect(request.referrer)
+    now = datetime.now()
+    return render_template('event_numbers.html', event=event, bookings=bookings, now=now)
