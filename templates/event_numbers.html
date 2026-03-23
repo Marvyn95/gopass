@@ -24,9 +24,9 @@
                     <th class="text-dark">Date</th>
                     <th class="text-dark">Phone Number</th>
                     <th class="text-dark">Ticket Category</th>
-                    <th class="text-dark">Ticket Price</th>
+                    <th class="text-dark">Ticket Price (UGX)</th>
                     <th class="text-dark">Quantity</th>
-                    <th class="text-dark">Total Price</th>
+                    <th class="text-dark">Total (UGX)</th>
                 </tr>
             </thead>
             <tbody>
@@ -37,7 +37,7 @@
                     <td class="text-dark">{{ booking.ticket_category|title }}</td>
                     <td class="text-dark">UGX {{ "{:,}".format(booking.ticket_price|int) }}</td>
                     <td class="text-dark">{{ booking.quantity }}</td>
-                    <td class="fw-bold text-dark">UGX {{ "{:,}".format(booking.total_price|int) }}</td>
+                    <td class="fw-bold text-dark">{{ "{:,}".format(booking.total_price|int) }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
