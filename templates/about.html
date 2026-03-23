@@ -244,10 +244,41 @@
                             one ticket at a time.
                         </p>
 
-                        <a href="{{ url_for('signup') }}"
-                           class="btn btn-primary btn-lg px-4">
+                        <button class="btn btn-primary btn-lg px-4"
+                                data-bs-toggle="modal"
+                                data-bs-target="#contactModal">
                             Get Started
-                        </a>
+                        </button>
+
+                        <!-- Contact Modal -->
+                        <div class="modal fade text-start" id="contactModal" tabindex="-1">
+                            <div class="modal-dialog">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h5 class="modal-title">Want To Sign Up?</h5>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <p class="text-muted mb-4">
+                                            If you want to sign up, please contact our administrators:
+                                        </p>
+                                        <div class="mb-3">
+                                            <strong>Marvin Luyombya</strong>
+                                            <br>
+                                            <a href="mailto:marvinluyombya@gmail.com">marvinluyombya@gmail.com</a>
+                                        </div>
+                                        <div>
+                                            <strong>Daniel Wangira</strong>
+                                            <br>
+                                            <a href="mailto:dan.wangira@gmail.com">dan.wangira@gmail.com</a>
+                                        </div>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
 
                     </section>
 

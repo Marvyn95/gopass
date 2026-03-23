@@ -148,6 +148,7 @@ def edit_profile():
 @app.route('/manage_users')
 def manage_users():
     user = db.users.find_one({'_id': ObjectId(session['user_id'])}) if 'user_id' in session else None
+    organizations = list(db.organizations.find())
 
     if user.get('role') == 'admin':
         users = list(db.users.find())
@@ -157,7 +158,8 @@ def manage_users():
         users = sorted(users, key=lambda x: x.get('first_name', '').lower())
     else:
         users = list(db.users.find({'organization_id': user.get('organization_id')})) if user and 'organization_id' in user else []
-    return render_template('manage_users.html', users=users, user=user)
+
+    return render_template('manage_users.html', users=users, user=user, organizations=organizations)
 
 
 @app.route('/create_event', methods=['GET', 'POST'])
@@ -775,7 +777,6 @@ def ticket_processing():
         'transaction_id': transaction_id
         }).inserted_id
     
-    print("Booking ID:", booking_id)
     
     ticket_io_strs = []
     for i in range(int(quantity)):
