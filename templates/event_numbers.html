@@ -32,7 +32,7 @@
             <tbody>
                 {% for booking in bookings %}
                 <tr>
-                    <td class="text-dark">{% if booking.date %}{{ booking.date.strftime('%d %b %Y') }} {% else %} N/A {% endif %}</td>
+                    <td class="text-dark">{% if booking.date %}{{ booking.date.strftime('%d %b %Y') }} {% else %} -- {% endif %}</td>
                     <td class="text-dark">{{ booking.phone_number }}</td>
                     <td class="text-dark">{{ booking.ticket_category|title }}</td>
                     <td class="text-dark">UGX {{ "{:,}".format(booking.ticket_price|int) }}</td>
