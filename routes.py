@@ -254,7 +254,7 @@ def logout():
 @app.route('/delete_user', methods=['POST'])
 def delete_user():
     if request.method == 'POST':
-        user_id = request.form['user_id']
+        user_id = request.form.get('user_id')
         db.users.delete_one({'_id': ObjectId(user_id)})
         flash('User deleted successfully!', 'success')
     return redirect(url_for('manage_users'))

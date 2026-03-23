@@ -139,6 +139,7 @@
                 <div class="modal-dialog modal-dialog-centered">
                     <div class="modal-content shadow-sm">
                         <form method="POST" action="{{ url_for('delete_user') }}">
+                            <input type="hidden" name="user_id" value="{{ u._id }}">
                             <div class="modal-header border-0">
                                 <h5 class="modal-title text-danger">Delete Employee</h5>
                                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
