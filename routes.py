@@ -550,52 +550,71 @@ def pesapal_payment_process():
         event_location = request.form.get('event_location')
         event_venue = request.form.get('event_venue')
         payment_method = request.form.get('payment_method')
-        phone_number = request.form.get('phone_number').strip()
+        phone_number = request.form.get('phone_number', '').strip()
 
         transaction_id = secrets.token_hex(8)
 
-        # logic for pesapal api integration goes here
-        token = generate_pesapal_access_token()
-        if token is None:
-            flash('Error generating access token for payment. Please try again later.', 'danger')
-            return redirect(request.referrer)
+        # # logic for pesapal api integration goes here
+        # token = generate_pesapal_access_token()
+        # if token is None:
+        #     flash('Error generating access token for payment. Please try again later.', 'danger')
+        #     return redirect(request.referrer)
         
-        with open('../config.json') as config_file:
-            config = json.load(config_file)
+        # with open('../config.json') as config_file:
+        #     config = json.load(config_file)
         
-        order_details = {
-            "id": f"{transaction_id}",
-            "currency": "UGX",
-            "amount": float(total_price),
-            "description": f"Payment for {quantity} {ticket_category} tickets to {event_title}",
-            "redirect_mode": "",
-            "callback_url": f"https://gopass.space/ticket_processing?event_id={event_id}&quantity={quantity}&ticket_category={ticket_category}&ticket_price={ticket_price}&total_price={total_price}&event_title={event_title}&event_category={event_category}&event_date={event_date}&event_start_time={event_start_time}&event_end_time={event_end_time}&event_location={event_location}&event_venue={event_venue}&payment_method={payment_method}&phone_number={phone_number}&transaction_id={transaction_id}",
-            "cancellation_url": f"https://gopass.space/event_details/{event_id}",
-            "notification_id": config.get('ipn_id'),
-            "branch": "MAIN_BRANCH",
-            "billing_address": {
-                "phone_number": phone_number,
-                "email_address": "",
-                "country_code": "UG",
-                "first_name": "",
-                "middle_name": "",
-                "last_name": "",
-                "line_1": "",
-                "line_2": "",
-                "city": "",
-                "state": "",
-                "postal_code": "",
-                "zip_code": ""
-                }
-            }
+        # order_details = {
+        #     "id": f"{transaction_id}",
+        #     "currency": "UGX",
+        #     "amount": float(total_price),
+        #     "description": f"Payment for {quantity} {ticket_category} tickets to {event_title}",
+        #     "redirect_mode": "",
+        #     "callback_url": f"https://gopass.space/ticket_processing?event_id={event_id}&quantity={quantity}&ticket_category={ticket_category}&ticket_price={ticket_price}&total_price={total_price}&event_title={event_title}&event_category={event_category}&event_date={event_date}&event_start_time={event_start_time}&event_end_time={event_end_time}&event_location={event_location}&event_venue={event_venue}&payment_method={payment_method}&phone_number={phone_number}&transaction_id={transaction_id}",
+        #     "cancellation_url": f"https://gopass.space/event_details/{event_id}",
+        #     "notification_id": config.get('ipn_id'),
+        #     "branch": "MAIN_BRANCH",
+        #     "billing_address": {
+        #         "phone_number": phone_number,
+        #         "email_address": "",
+        #         "country_code": "UG",
+        #         "first_name": "",
+        #         "middle_name": "",
+        #         "last_name": "",
+        #         "line_1": "",
+        #         "line_2": "",
+        #         "city": "",
+        #         "state": "",
+        #         "postal_code": "",
+        #         "zip_code": ""
+        #         }
+        #     }
         
-        order_response = pesa_pal_submit_order_request(token, order_details)
+        # order_response = pesa_pal_submit_order_request(token, order_details)
 
-        if order_response.get('status') != '200':
-            flash('Error submitting order request for payment. Please try again later.', 'danger')
-            return redirect(request.referrer)
-        elif order_response.get('status') == '200':
-            return redirect(order_response.get('redirect_url'))
+        # if order_response.get('status') != '200':
+        #     flash('Error submitting order request for payment. Please try again later.', 'danger')
+        #     return redirect(request.referrer)
+        # elif order_response.get('status') == '200':
+        #     return redirect(order_response.get('redirect_url'))
+        
+        return redirect(url_for(
+            'ticket_processing',
+            event_id=event_id,
+            quantity=quantity,
+            ticket_category=ticket_category,
+            ticket_price=ticket_price,
+            total_price=total_price,
+            event_title=event_title,
+            event_category=event_category,
+            event_date=event_date,
+            event_start_time=event_start_time,
+            event_end_time=event_end_time,
+            event_location=event_location,
+            event_venue=event_venue,
+            payment_method=payment_method,
+            phone_number=phone_number,
+            transaction_id=transaction_id
+        ))
 
     
 
